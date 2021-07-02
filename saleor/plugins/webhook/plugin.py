@@ -3,6 +3,7 @@ import logging
 from typing import TYPE_CHECKING, Any, List, Optional
 
 from ...app.models import App
+from ...core.models import EventPayload
 from ...core.utils.json_serializer import CustomJsonEncoder
 from ...payment import PaymentError, TransactionKind
 from ...webhook.event_types import WebhookEventType
@@ -229,7 +230,10 @@ class WebhookPlugin(BasePlugin):
         if not self.active:
             return previous_value
         page_data = generate_page_payload(page)
-        trigger_webhooks_for_event.delay(WebhookEventType.PAGE_UPDATED, page_data)
+        event_payload = EventPayload.objects.create(payload=page_data)
+        trigger_webhooks_for_event.delay(
+            WebhookEventType.PAGE_UPDATED, event_payload.id
+        )
 
     def page_deleted(self, page: "Page", previous_value: Any) -> Any:
         if not self.active:
