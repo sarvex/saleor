@@ -340,11 +340,11 @@ def test_update_attribute_slug(
     content = get_graphql_content(response)
     attribute.refresh_from_db()
     data = content["data"]["attributeUpdate"]
-    errors = data["errors"]
     if not error_message:
         assert data["attribute"]["name"] == name == attribute.name
         assert data["attribute"]["slug"] == input_slug == attribute.slug
     else:
+        errors = data["errors"]
         assert errors
         assert data["attribute"] is None
         assert errors[0]["field"] == "slug"
@@ -451,11 +451,11 @@ def test_update_attribute_slug_and_name(
     content = get_graphql_content(response)
     attribute.refresh_from_db()
     data = content["data"]["attributeUpdate"]
-    errors = data["errors"]
     if not error_message:
         assert data["attribute"]["name"] == input_name == attribute.name
         assert data["attribute"]["slug"] == input_slug == attribute.slug
     else:
+        errors = data["errors"]
         assert errors
         assert errors[0]["field"] == error_field
         assert errors[0]["code"] == AttributeErrorCode.REQUIRED.name

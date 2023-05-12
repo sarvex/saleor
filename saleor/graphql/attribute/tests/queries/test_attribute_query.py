@@ -560,8 +560,9 @@ def test_attributes_in_collection_query(
     }
     """
 
-    query = query % {
-        "filter_input": "filter: { %s: $nodeID } channel: $channel" % tested_field
+    query %= {
+        "filter_input": "filter: { %s: $nodeID } channel: $channel"
+        % tested_field
     }
 
     variables = {"nodeID": filtered_by_node_id, "channel": channel_USD.slug}

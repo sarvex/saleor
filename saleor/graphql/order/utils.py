@@ -129,10 +129,11 @@ def validate_product_is_published_in_channel(
             }
         )
     variant_ids = [variant.id for variant in variants]
-    unpublished_product = list(
-        Product.objects.filter(variants__id__in=variant_ids).not_published(channel.slug)
-    )
-    if unpublished_product:
+    if unpublished_product := list(
+        Product.objects.filter(variants__id__in=variant_ids).not_published(
+            channel.slug
+        )
+    ):
         unpublished_variants = ProductVariant.objects.filter(
             product_id__in=unpublished_product, id__in=variant_ids
         ).values_list("pk", flat=True)

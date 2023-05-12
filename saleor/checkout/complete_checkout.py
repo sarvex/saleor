@@ -124,7 +124,7 @@ def _validate_gift_cards(checkout: Checkout):
     active_gift_cards = (
         GiftCard.objects.active(date=today).filter(checkouts=checkout.token).count()
     )
-    if not all_gift_cards == active_gift_cards:
+    if all_gift_cards != active_gift_cards:
         msg = "Gift card has expired. Order placement cancelled."
         raise NotApplicable(msg)
 
@@ -196,9 +196,7 @@ def _create_line_for_order(
         tax_rate=tax_rate,
     )
 
-    line_info = OrderLineData(line=line, quantity=quantity, variant=variant)
-
-    return line_info
+    return OrderLineData(line=line, quantity=quantity, variant=variant)
 
 
 def _create_lines_for_order(
@@ -293,8 +291,8 @@ def _prepare_order_data(
     shipping_tax_rate = manager.get_checkout_shipping_tax_rate(
         checkout_info, lines, address, discounts, shipping_total
     )
-    order_data.update(
-        _process_shipping_data_for_order(checkout_info, shipping_total, manager, lines)
+    order_data |= _process_shipping_data_for_order(
+        checkout_info, shipping_total, manager, lines
     )
     order_data.update(_process_user_data_for_order(checkout_info, manager))
     order_data.update(
@@ -477,8 +475,7 @@ def _prepare_checkout(
 
 
 def release_voucher_usage(order_data: dict):
-    voucher = order_data.get("voucher")
-    if voucher:
+    if voucher := order_data.get("voucher"):
         decrease_voucher_usage(voucher)
         if "user_email" in order_data:
             remove_voucher_usage_by_customer(voucher, order_data["user_email"])
@@ -508,7 +505,7 @@ def _get_order_data(
         )
     except TaxError as tax_error:
         raise ValidationError(
-            "Unable to calculate taxes - %s" % str(tax_error),
+            f"Unable to calculate taxes - {str(tax_error)}",
             code=CheckoutErrorCode.TAX_ERROR.value,
         )
     return order_data

@@ -10,11 +10,10 @@ def create_through_product_relations(apps, schema_editor):
         "attribute", "AssignedProductAttributeValue"
     )
     for assignment in AssignedProductAttribute.objects.iterator():
-        instances = []
-        for value in assignment.values.all():
-            instances.append(
-                AssignedProductAttributeValue(value=value, assignment=assignment)
-            )
+        instances = [
+            AssignedProductAttributeValue(value=value, assignment=assignment)
+            for value in assignment.values.all()
+        ]
         AssignedProductAttributeValue.objects.bulk_create(instances)
 
 
@@ -24,11 +23,10 @@ def create_through_variant_relations(apps, schema_editor):
         "attribute", "AssignedVariantAttributeValue"
     )
     for assignment in AssignedVariantAttribute.objects.iterator():
-        instances = []
-        for value in assignment.values.all():
-            instances.append(
-                AssignedVariantAttributeValue(value=value, assignment=assignment)
-            )
+        instances = [
+            AssignedVariantAttributeValue(value=value, assignment=assignment)
+            for value in assignment.values.all()
+        ]
         AssignedVariantAttributeValue.objects.bulk_create(instances)
 
 
@@ -38,11 +36,10 @@ def create_through_page_relations(apps, schema_editor):
         "attribute", "AssignedPageAttributeValue"
     )
     for assignment in AssignedPageAttribute.objects.iterator():
-        instances = []
-        for value in assignment.values.all():
-            instances.append(
-                AssignedPageAttributeValue(value=value, assignment=assignment)
-            )
+        instances = [
+            AssignedPageAttributeValue(value=value, assignment=assignment)
+            for value in assignment.values.all()
+        ]
         AssignedPageAttributeValue.objects.bulk_create(instances)
 
 

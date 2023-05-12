@@ -23,7 +23,7 @@ def validate_one_of_args_is_in_query(*args):
     # [(arg1_name, arg1_value), (arg2_name, arg2_value), ...]
     splitted_args = [args[i : i + 2] for i in range(0, len(args), 2)]  # noqa: E203
     # filter trueish values from each tuple
-    filter_args = list(filter(lambda item: bool(item[1]) is True, splitted_args))
+    filter_args = list(filter(lambda item: bool(item[1]), splitted_args))
 
     if len(filter_args) > 1:
         rest_args = ", ".join([f"'{item[0]}'" for item in filter_args[1:]])
@@ -64,8 +64,7 @@ def validate_variants_available_in_channel(
     available_variants = ProductVariantChannelListing.objects.filter(
         variant__id__in=variants_id, channel_id=channel_id, price_amount__isnull=False
     ).values_list("variant_id", flat=True)
-    not_available_variants = variants_id - set(available_variants)
-    if not_available_variants:
+    if not_available_variants := variants_id - set(available_variants):
         not_available_variants_ids = {
             graphene.Node.to_global_id("ProductVariant", pk)
             for pk in not_available_variants

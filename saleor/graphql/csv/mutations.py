@@ -119,8 +119,9 @@ class ExportProducts(BaseMutation):
 
     @staticmethod
     def clean_filter(input) -> Dict[str, dict]:
-        filter = input.get("filter")
-        if not filter:
+        if filter := input.get("filter"):
+            return {"filter": filter}
+        else:
             raise ValidationError(
                 {
                     "filter": ValidationError(
@@ -129,13 +130,11 @@ class ExportProducts(BaseMutation):
                     )
                 }
             )
-        return {"filter": filter}
 
     @classmethod
     def get_export_info(cls, export_info_input):
         export_info = {}
-        fields = export_info_input.get("fields")
-        if fields:
+        if fields := export_info_input.get("fields"):
             export_info["fields"] = fields
 
         for field, graphene_type in [
@@ -143,16 +142,14 @@ class ExportProducts(BaseMutation):
             ("warehouses", Warehouse),
             ("channels", Channel),
         ]:
-            pks = cls.get_items_pks(field, export_info_input, graphene_type)
-            if pks:
+            if pks := cls.get_items_pks(field, export_info_input, graphene_type):
                 export_info[field] = pks
 
         return export_info
 
     @classmethod
     def get_items_pks(cls, field, export_info_input, graphene_type):
-        ids = export_info_input.get(field)
-        if not ids:
+        if ids := export_info_input.get(field):
+            return cls.get_global_ids_or_error(ids, only_type=graphene_type, field=field)
+        else:
             return
-        pks = cls.get_global_ids_or_error(ids, only_type=graphene_type, field=field)
-        return pks

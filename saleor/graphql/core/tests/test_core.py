@@ -128,9 +128,12 @@ def test_total_count_query(api_client, product, channel_USD):
 
 
 def test_filter_input():
+
     class CreatedEnum(graphene.Enum):
         WEEK = "week"
         YEAR = "year"
+
+
 
     class TestProductFilter(django_filters.FilterSet):
         name = django_filters.CharFilter()
@@ -141,11 +144,8 @@ def test_filter_input():
             fields = {"product_type__id": ["exact"]}
 
         def created_filter(self, queryset, _, value):
-            if CreatedEnum.WEEK == value:
-                return queryset
-            elif CreatedEnum.YEAR == value:
-                return queryset
             return queryset
+
 
     class TestFilter(FilterInputObjectType):
         class Meta:

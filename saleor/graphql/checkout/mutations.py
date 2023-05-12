@@ -182,8 +182,9 @@ def validate_variants_available_for_purchase(variants_id: set, channel_id: int):
     available_variants = ProductChannelListing.objects.filter(
         is_available_for_purchase
     ).values_list("product__variants__id", flat=True)
-    not_available_variants = variants_id.difference(set(available_variants))
-    if not_available_variants:
+    if not_available_variants := variants_id.difference(
+        set(available_variants)
+    ):
         variant_ids = [
             graphene.Node.to_global_id("ProductVariant", pk)
             for pk in not_available_variants
@@ -300,9 +301,7 @@ class CheckoutCreate(ModelMutation, I18nMixin):
             return cls.validate_address(
                 data["shipping_address"], address_type=AddressType.SHIPPING
             )
-        if user.is_authenticated:
-            return user.default_shipping_address
-        return None
+        return user.default_shipping_address if user.is_authenticated else None
 
     @classmethod
     def retrieve_billing_address(cls, user, data: dict) -> Optional["Address"]:
@@ -310,9 +309,7 @@ class CheckoutCreate(ModelMutation, I18nMixin):
             return cls.validate_address(
                 data["billing_address"], address_type=AddressType.BILLING
             )
-        if user.is_authenticated:
-            return user.default_billing_address
-        return None
+        return user.default_billing_address if user.is_authenticated else None
 
     @classmethod
     def clean_input(cls, info, instance: models.Checkout, data, input_cls=None):
@@ -330,9 +327,7 @@ class CheckoutCreate(ModelMutation, I18nMixin):
             company_address=info.context.site.settings.company_address,
         )
 
-        # Resolve and process the lines, retrieving the variants and quantities
-        lines = data.pop("lines", None)
-        if lines:
+        if lines := data.pop("lines", None):
             (
                 cleaned_input["variants"],
                 cleaned_input["quantities"],
@@ -383,8 +378,7 @@ class CheckoutCreate(ModelMutation, I18nMixin):
             shipping_address.save()
             instance.shipping_address = shipping_address.get_copy()
 
-        billing_address = cleaned_input.get("billing_address")
-        if billing_address:
+        if billing_address := cleaned_input.get("billing_address"):
             billing_address.save()
             instance.billing_address = billing_address.get_copy()
 
@@ -401,8 +395,7 @@ class CheckoutCreate(ModelMutation, I18nMixin):
     @classmethod
     def perform_mutation(cls, _root, info, **data):
         channel_input = data.get("input", {}).get("channel")
-        channel = clean_channel(channel_input, error_class=CheckoutErrorCode)
-        if channel:
+        if channel := clean_channel(channel_input, error_class=CheckoutErrorCode):
             data["input"]["channel"] = channel
         response = super().perform_mutation(_root, info, **data)
         info.context.plugins.checkout_created(response.checkout)

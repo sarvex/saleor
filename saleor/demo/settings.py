@@ -52,9 +52,7 @@ INSTALLED_APPS += ["saleor.demo", "saleor.core"]
 
 
 def _get_project_name_from_url(url: str) -> str:
-    if PWA_DASHBOARD_URL_RE.match(url):
-        return "dashboard"
-    return "storefront"
+    return "dashboard" if PWA_DASHBOARD_URL_RE.match(url) else "storefront"
 
 
 def before_send(event: dict, _hint: dict):
@@ -78,8 +76,7 @@ def before_send(event: dict, _hint: dict):
     return None
 
 
-DEMO_SENTRY_DSN = os.environ.get("DEMO_SENTRY_DSN")
-if DEMO_SENTRY_DSN:
+if DEMO_SENTRY_DSN := os.environ.get("DEMO_SENTRY_DSN"):
     sentry_sdk.init(
         DEMO_SENTRY_DSN,
         integrations=[CeleryIntegration(), DjangoIntegration()],

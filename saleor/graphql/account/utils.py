@@ -113,8 +113,7 @@ class StaffDeleteMixin(UserDeleteMixin):
         """Requestor can't manage users with wider scope of permissions."""
         if requestor.is_superuser:
             return
-        out_of_scope_users = get_out_of_scope_users(requestor, instances)
-        if out_of_scope_users:
+        if out_of_scope_users := get_out_of_scope_users(requestor, instances):
             user_pks = [
                 graphene.Node.to_global_id("User", user.pk)
                 for user in out_of_scope_users
@@ -137,10 +136,9 @@ class StaffDeleteMixin(UserDeleteMixin):
         """
         if requestor.is_superuser:
             return
-        permissions = get_not_manageable_permissions_when_deactivate_or_remove_users(
+        if permissions := get_not_manageable_permissions_when_deactivate_or_remove_users(
             users
-        )
-        if permissions:
+        ):
             # add error
             msg = "Users cannot be removed, some of permissions will not be manageable."
             code = AccountErrorCode.LEFT_NOT_MANAGEABLE_PERMISSION.value
@@ -162,9 +160,7 @@ def get_upper_fields_camel_case(upper_fields: set) -> set:
 def validation_field_to_camel_case(name: str) -> str:
     """Convert name of the field from snake case to camel case."""
     name = to_camel_case(name)
-    if name == "streetAddress":
-        return "streetAddress1"
-    return name
+    return "streetAddress1" if name == "streetAddress" else name
 
 
 def get_allowed_fields_camel_case(allowed_fields: set) -> set:
@@ -184,11 +180,7 @@ def get_out_of_scope_permissions(
     requestor: Union["User", "App"], permissions: List[str]
 ) -> List[str]:
     """Return permissions that the requestor hasn't got."""
-    missing_permissions = []
-    for perm in permissions:
-        if not requestor.has_perm(perm):
-            missing_permissions.append(perm)
-    return missing_permissions
+    return [perm for perm in permissions if not requestor.has_perm(perm)]
 
 
 def get_out_of_scope_users(root_user: "User", users: List["User"]):
@@ -319,16 +311,13 @@ def get_not_manageable_permissions_after_removing_users_from_group(
     # if True, all group permissions can be managed
     group_remaining_users = set(group_users) - set(users)
     manage_staff_permission = AccountPermissions.MANAGE_STAFF.value
-    if any([user.has_perm(manage_staff_permission) for user in group_remaining_users]):
+    if any(
+        user.has_perm(manage_staff_permission)
+        for user in group_remaining_users
+    ):
         return set()
 
-    # if group and any of remaining group user doesn't have manage staff permission
-    # we can treat the situation as this when group is removing
-    not_manageable_permissions = get_not_manageable_permissions_after_group_deleting(
-        group
-    )
-
-    return not_manageable_permissions
+    return get_not_manageable_permissions_after_group_deleting(group)
 
 
 def get_not_manageable_permissions_after_group_deleting(group):
@@ -382,7 +371,6 @@ def get_group_to_permissions_and_users_mapping():
             },
         }
     """
-    mapping = {}
     groups_data = (
         Group.objects.all()
         .annotate(
@@ -399,13 +387,13 @@ def get_group_to_permissions_and_users_mapping():
         .values("pk", "perm_codenames", "users")
     )
 
-    for data in groups_data:
-        mapping[data["pk"]] = {
+    return {
+        data["pk"]: {
             "permissions": set(data["perm_codenames"]),
             "users": set(data["users"]),
         }
-
-    return mapping
+        for data in groups_data
+    }
 
 
 def get_users_and_look_for_permissions_in_groups_with_manage_staff(
@@ -451,10 +439,9 @@ def look_for_permission_in_users_with_manage_staff(
 
     """
     for data in groups_data.values():
-        permissions = data["permissions"]
         users = data["users"]
-        common_users = users_to_check & users
-        if common_users:
+        if common_users := users_to_check & users:
+            permissions = data["permissions"]
             common_permissions = permissions_to_find & permissions
             # remove found permission from set
             permissions_to_find.difference_update(common_permissions)

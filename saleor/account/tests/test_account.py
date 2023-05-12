@@ -112,7 +112,7 @@ def test_address_form_phone_number_validation(country, phone, is_valid):
 )
 def test_get_address_form(form_data, form_valid, expected_preview, expected_country):
     data = {"first_name": "John", "last_name": "Doe", "country": "PL"}
-    data.update(form_data)
+    data |= form_data
     query_dict = urlencode(data)
     form, preview = forms.get_address_form(
         data=QueryDict(query_dict), country_code=data["country"]

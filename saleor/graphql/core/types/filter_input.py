@@ -52,8 +52,7 @@ class FilterInputObjectType(InputObjectType):
 
         args = {}
         for name, filter_field in cls.filterset_class.base_filters.items():
-            input_class = getattr(filter_field, "input_class", None)
-            if input_class:
+            if input_class := getattr(filter_field, "input_class", None):
                 field_type = convert_form_field(filter_field)
             else:
                 field_type = convert_form_field(filter_field.field)

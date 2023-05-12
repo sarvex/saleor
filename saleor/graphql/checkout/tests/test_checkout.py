@@ -189,7 +189,8 @@ def test_checkout_create_with_default_channel(
     assert calculate_checkout_quantity(lines) == quantity
 
     assert any(
-        [str(warning.message) == DEPRECATION_WARNING_MESSAGE for warning in warns]
+        str(warning.message) == DEPRECATION_WARNING_MESSAGE
+        for warning in warns
     )
 
 
@@ -301,7 +302,8 @@ def test_checkout_create_with_inactive_default_channel(
     assert new_checkout.channel == channel_USD
 
     assert any(
-        [str(warning.message) == DEPRECATION_WARNING_MESSAGE for warning in warns]
+        str(warning.message) == DEPRECATION_WARNING_MESSAGE
+        for warning in warns
     )
 
 
@@ -333,7 +335,8 @@ def test_checkout_create_with_inactive_and_active_default_channel(
     assert new_checkout.channel == channel_USD
 
     assert any(
-        [str(warning.message) == DEPRECATION_WARNING_MESSAGE for warning in warns]
+        str(warning.message) == DEPRECATION_WARNING_MESSAGE
+        for warning in warns
     )
 
 
@@ -922,7 +925,7 @@ def test_checkout_create_logged_in_customer_custom_email(
         }
     }
     assert not Checkout.objects.exists()
-    assert not custom_email == customer.email
+    assert custom_email != customer.email
     response = user_api_client.post_graphql(MUTATION_CHECKOUT_CREATE, variables)
     content = get_graphql_content(response)
     new_checkout = Checkout.objects.first()
@@ -960,10 +963,8 @@ def test_checkout_create_logged_in_customer_custom_addresses(
     checkout_user = new_checkout.user
     customer = user_api_client.user
     assert customer.id == checkout_user.id
-    assert not (
-        customer.default_shipping_address_id == new_checkout.shipping_address_id
-    )
-    assert not (customer.default_billing_address_id == new_checkout.billing_address_id)
+    assert customer.default_shipping_address_id != new_checkout.shipping_address_id
+    assert customer.default_billing_address_id != new_checkout.billing_address_id
     assert new_checkout.shipping_address.first_name == shipping_address["firstName"]
     assert new_checkout.billing_address.first_name == billing_address["firstName"]
 

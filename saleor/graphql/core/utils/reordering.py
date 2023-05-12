@@ -125,20 +125,15 @@ class Reordering:
         if not self.old_sort_map:
             return
 
-        # Create the bulk update to run
-        # But only if data was changed
-        batch = [
+        if batch := [
             FinalSortOrder(pk, sort_order)
             for pk, sort_order in self.ordered_node_map.items()
             if sort_order != self.old_sort_map[pk]
-        ]
-
-        # Do not update if nothing changed
-        if not batch:
+        ]:
+            # Update everything that was changed
+            self.qs.model.objects.bulk_update(batch, ["sort_order"])
+        else:
             return
-
-        # Update everything that was changed
-        self.qs.model.objects.bulk_update(batch, ["sort_order"])
 
     def run(self):
 

@@ -49,9 +49,7 @@ def filter_attributes_by_product_types(qs, field, value, requestor, channel_slug
 
 
 def filter_attribute_type(qs, _, value):
-    if not value:
-        return qs
-    return qs.filter(type=value)
+    return qs if not value else qs.filter(type=value)
 
 
 class AttributeValueFilter(django_filters.FilterSet):

@@ -83,14 +83,15 @@ class CreateToken(BaseMutation):
     @classmethod
     def _retrieve_user_from_credentials(cls, email, password) -> Optional[models.User]:
         user = models.User.objects.filter(email=email, is_active=True).first()
-        if user and user.check_password(password):
-            return user
-        return None
+        return user if user and user.check_password(password) else None
 
     @classmethod
     def get_user(cls, _info, data):
-        user = cls._retrieve_user_from_credentials(data["email"], data["password"])
-        if not user:
+        if user := cls._retrieve_user_from_credentials(
+            data["email"], data["password"]
+        ):
+            return user
+        else:
             raise ValidationError(
                 {
                     "email": ValidationError(
@@ -99,7 +100,6 @@ class CreateToken(BaseMutation):
                     )
                 }
             )
-        return user
 
     @classmethod
     def perform_mutation(cls, root, info, **data):

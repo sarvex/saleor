@@ -1,9 +1,9 @@
 def obfuscate_email(value):
     string_rep = str(value)
-    if "@" not in str(string_rep):
+    if "@" not in string_rep:
         return obfuscate_string(string_rep)
-    local_part, domain = str(string_rep).split("@")
-    return "{}...@{}".format(local_part[:1], domain)
+    local_part, domain = string_rep.split("@")
+    return f"{local_part[:1]}...@{domain}"
 
 
 def obfuscate_string(value, phone=False):

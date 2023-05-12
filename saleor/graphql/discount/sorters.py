@@ -16,14 +16,14 @@ class SaleSortField(graphene.Enum):
         if self.name in SaleSortField.__enum__._member_names_:
             sort_name = self.name.lower().replace("_", " ")
             return f"Sort sales by {sort_name}."
-        raise ValueError("Unsupported enum value: %s" % self.value)
+        raise ValueError(f"Unsupported enum value: {self.value}")
 
     @staticmethod
     def qs_with_value(queryset: QuerySet, channel_slug: str) -> QuerySet:
         return queryset.annotate(
             value=Min(
                 "channel_listings__discount_value",
-                filter=Q(channel_listings__channel__slug=str(channel_slug)),
+                filter=Q(channel_listings__channel__slug=channel_slug),
             )
         )
 
@@ -48,14 +48,14 @@ class VoucherSortField(graphene.Enum):
         if self.name in VoucherSortField.__enum__._member_names_:
             sort_name = self.name.lower().replace("_", " ")
             return f"Sort vouchers by {sort_name}."
-        raise ValueError("Unsupported enum value: %s" % self.value)
+        raise ValueError(f"Unsupported enum value: {self.value}")
 
     @staticmethod
     def qs_with_minimum_spent_amount(queryset: QuerySet, channel_slug: str) -> QuerySet:
         return queryset.annotate(
             min_spent_amount=Min(
                 "channel_listings__min_spent_amount",
-                filter=Q(channel_listings__channel__slug=str(channel_slug)),
+                filter=Q(channel_listings__channel__slug=channel_slug),
             )
         )
 
@@ -64,7 +64,7 @@ class VoucherSortField(graphene.Enum):
         return queryset.annotate(
             discount_value=Min(
                 "channel_listings__discount_value",
-                filter=Q(channel_listings__channel__slug=str(channel_slug)),
+                filter=Q(channel_listings__channel__slug=channel_slug),
             )
         )
 

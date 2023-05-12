@@ -38,5 +38,6 @@ def test_orders_total(staff_api_client, permission_manage_orders, order_with_lin
     amount = str(content["data"]["ordersTotal"]["gross"]["amount"])
     assert Money(amount, "USD") == order.total.gross
     assert any(
-        [str(warning.message) == DEPRECATION_WARNING_MESSAGE for warning in warns]
+        str(warning.message) == DEPRECATION_WARNING_MESSAGE
+        for warning in warns
     )

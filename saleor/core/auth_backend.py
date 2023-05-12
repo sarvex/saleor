@@ -10,9 +10,7 @@ class JSONWebTokenBackend(ModelBackend):
             return None
 
         token = get_token_from_request(request)
-        if not token:
-            return None
-        return get_user_from_access_token(token)
+        return None if not token else get_user_from_access_token(token)
 
     def get_user(self, user_id):
         try:
@@ -39,16 +37,12 @@ class JSONWebTokenBackend(ModelBackend):
 
         perm_cache_name = "_effective_permissions_cache"
         if not getattr(user_obj, perm_cache_name, None):
-            perms = getattr(self, "_get_%s_permissions" % from_name)(user_obj)
+            perms = getattr(self, f"_get_{from_name}_permissions")(user_obj)
             perms = perms.values_list("content_type__app_label", "codename").order_by()
-            setattr(
-                user_obj, perm_cache_name, {"%s.%s" % (ct, name) for ct, name in perms}
-            )
+            setattr(user_obj, perm_cache_name, {f"{ct}.{name}" for ct, name in perms})
         return getattr(user_obj, perm_cache_name)
 
 
 class PluginBackend(JSONWebTokenBackend):
     def authenticate(self, request=None, **kwargs):
-        if request is None:
-            return None
-        return request.plugins.authenticate_user(request)
+        return None if request is None else request.plugins.authenticate_user(request)

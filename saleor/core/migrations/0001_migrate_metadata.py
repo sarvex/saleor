@@ -5,9 +5,8 @@ from django.db import migrations
 
 def flatten_model_metadata(model_with_metadata):
     updated_fields = []
-    public_meta = model_with_metadata.metadata
     private_meta = model_with_metadata.private_metadata
-    if public_meta:
+    if public_meta := model_with_metadata.metadata:
         model_with_metadata.metadata = flatten_metadata(public_meta)
         updated_fields.append("metadata")
     if private_meta:
@@ -22,7 +21,7 @@ def flatten_metadata(metadata):
     for _, namespace in metadata.items():
         for client_name, client in namespace.items():
             for key, value in client.items():
-                flattened_key = client_name + "." + key
+                flattened_key = f"{client_name}.{key}"
                 if flattened_key in flattened_metadata:
                     raise Exception(f"Meta key {flattened_key} is duplicated.")
                 flattened_metadata[flattened_key] = value

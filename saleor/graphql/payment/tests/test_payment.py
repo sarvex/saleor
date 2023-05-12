@@ -418,7 +418,7 @@ def test_create_payment_for_checkout_with_active_payments(
     previous_active_payments_ids = list(
         previous_active_payments.values_list("pk", flat=True)
     )
-    assert len(previous_active_payments_ids) > 0
+    assert previous_active_payments_ids
 
     # when
     response = user_api_client.post_graphql(CREATE_PAYMENT_MUTATION, variables)

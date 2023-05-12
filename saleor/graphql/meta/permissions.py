@@ -41,12 +41,14 @@ def public_user_permissions(info, user_pk: int) -> List[BasePermissionEnum]:
 
 
 def private_user_permissions(_info, user_pk: int) -> List[BasePermissionEnum]:
-    user = account_models.User.objects.filter(pk=user_pk).first()
-    if not user:
+    if user := account_models.User.objects.filter(pk=user_pk).first():
+        return (
+            [AccountPermissions.MANAGE_STAFF]
+            if user.is_staff
+            else [AccountPermissions.MANAGE_USERS]
+        )
+    else:
         raise PermissionDenied()
-    if user.is_staff:
-        return [AccountPermissions.MANAGE_STAFF]
-    return [AccountPermissions.MANAGE_USERS]
 
 
 def product_permissions(_info, _object_pk: Any) -> List[BasePermissionEnum]:

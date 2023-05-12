@@ -9,8 +9,7 @@ def resolve_checkout_line(id):
 
 
 def resolve_checkout_lines():
-    queryset = models.CheckoutLine.objects.all()
-    return queryset
+    return models.CheckoutLine.objects.all()
 
 
 def resolve_checkouts(channel_slug):

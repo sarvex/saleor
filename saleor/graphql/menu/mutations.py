@@ -180,8 +180,7 @@ def _validate_menu_item_instance(
     cleaned_input: dict, field: str, expected_model: Type[Model]
 ):
     """Check if the value to assign as a menu item matches the expected model."""
-    item = cleaned_input.get(field)
-    if item:
+    if item := cleaned_input.get(field):
         if not isinstance(item, expected_model):
             msg = (
                 f"Enter a valid {expected_model._meta.verbose_name} ID "
@@ -318,34 +317,35 @@ class MenuItemMove(BaseMutation):
     @staticmethod
     def clean_move(move: MenuItemMoveInput):
         """Validate if the given move could be possibly possible."""
-        if move.parent_id:
-            if move.item_id == move.parent_id:
-                raise ValidationError(
-                    {
-                        "parent_id": ValidationError(
-                            "Cannot assign a node to itself.",
-                            code=MenuErrorCode.CANNOT_ASSIGN_NODE.value,
-                        )
-                    }
-                )
+        if move.parent_id and move.item_id == move.parent_id:
+            raise ValidationError(
+                {
+                    "parent_id": ValidationError(
+                        "Cannot assign a node to itself.",
+                        code=MenuErrorCode.CANNOT_ASSIGN_NODE.value,
+                    )
+                }
+            )
 
     @staticmethod
     def clean_operation(operation: _MenuMoveOperation):
         """Validate if the given move will be actually possible."""
 
-        if operation.new_parent is not None:
-            if operation.menu_item.is_ancestor_of(operation.new_parent):
-                raise ValidationError(
-                    {
-                        "parent_id": ValidationError(
-                            (
-                                "Cannot assign a node as child of "
-                                "one of its descendants."
-                            ),
-                            code=MenuErrorCode.CANNOT_ASSIGN_NODE.value,
-                        )
-                    }
-                )
+        if (
+            operation.new_parent is not None
+            and operation.menu_item.is_ancestor_of(operation.new_parent)
+        ):
+            raise ValidationError(
+                {
+                    "parent_id": ValidationError(
+                        (
+                            "Cannot assign a node as child of "
+                            "one of its descendants."
+                        ),
+                        code=MenuErrorCode.CANNOT_ASSIGN_NODE.value,
+                    )
+                }
+            )
 
     @classmethod
     def get_operation(
@@ -369,7 +369,7 @@ class MenuItemMove(BaseMutation):
                     qs=menu.items,
                 )
                 parent_changed = True
-        elif move.parent_id is None and menu_item.parent_id is not None:
+        elif menu_item.parent_id is not None:
             parent_changed = True
 
         return _MenuMoveOperation(

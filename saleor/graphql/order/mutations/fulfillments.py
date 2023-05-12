@@ -124,8 +124,7 @@ class OrderFulfill(BaseMutation):
     @classmethod
     def check_warehouses_for_duplicates(cls, warehouse_ids):
         for warehouse_ids_for_line in warehouse_ids:
-            duplicates = get_duplicated_values(warehouse_ids_for_line)
-            if duplicates:
+            if duplicates := get_duplicated_values(warehouse_ids_for_line):
                 raise ValidationError(
                     {
                         "warehouse": ValidationError(
@@ -138,8 +137,7 @@ class OrderFulfill(BaseMutation):
 
     @classmethod
     def check_lines_for_duplicates(cls, lines_ids):
-        duplicates = get_duplicated_values(lines_ids)
-        if duplicates:
+        if duplicates := get_duplicated_values(lines_ids):
             raise ValidationError(
                 {
                     "orderLineId": ValidationError(
@@ -259,8 +257,7 @@ class FulfillmentUpdateTracking(BaseMutation):
             fulfillment, info.context.user, tracking_number, info.context.plugins
         )
         input_data = data.get("input", {})
-        notify_customer = input_data.get("notify_customer")
-        if notify_customer:
+        if notify_customer := input_data.get("notify_customer"):
             send_fulfillment_update(order, fulfillment, info.context.plugins)
         return FulfillmentUpdateTracking(fulfillment=fulfillment, order=order)
 
@@ -530,9 +527,10 @@ class FulfillmentRefundProducts(FulfillmentRefundAndReturnProductBase):
         cls.clean_order_payment(payment, cleaned_input)
         cls.clean_amount_to_refund(amount_to_refund, payment, cleaned_input)
 
-        cleaned_input.update(
-            {"include_shipping_costs": include_shipping_costs, "order": order}
-        )
+        cleaned_input |= {
+            "include_shipping_costs": include_shipping_costs,
+            "order": order,
+        }
 
         order_lines_data = input.get("order_lines", [])
         fulfillment_lines_data = input.get("fulfillment_lines", [])
@@ -669,13 +667,11 @@ class FulfillmentReturnProducts(FulfillmentRefundAndReturnProductBase):
             cls.clean_order_payment(payment, cleaned_input)
             cls.clean_amount_to_refund(amount_to_refund, payment, cleaned_input)
 
-        cleaned_input.update(
-            {
-                "include_shipping_costs": include_shipping_costs,
-                "order": order,
-                "refund": refund,
-            }
-        )
+        cleaned_input |= {
+            "include_shipping_costs": include_shipping_costs,
+            "order": order,
+            "refund": refund,
+        }
 
         order_lines_data = input.get("order_lines")
         fulfillment_lines_data = input.get("fulfillment_lines")

@@ -68,10 +68,9 @@ def create_superuser(credentials):
         create_thumbnails(
             pk=user.pk, model=User, size_set="user_avatars", image_attr="avatar"
         )
-        msg = "Superuser - %(email)s/%(password)s" % credentials
+        return "Superuser - %(email)s/%(password)s" % credentials
     else:
-        msg = "Superuser already exists - %(email)s" % credentials
-    return msg
+        return "Superuser already exists - %(email)s" % credentials
 
 
 def remove_staff_member(staff):

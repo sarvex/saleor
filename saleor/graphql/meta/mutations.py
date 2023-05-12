@@ -67,7 +67,7 @@ class BaseMetadataMutation(BaseMutation):
     @classmethod
     def validate_metadata_keys(cls, metadata_list: List[dict]):
         # raise an error when any of the key is empty
-        if not all([data["key"].strip() for data in metadata_list]):
+        if not all(data["key"].strip() for data in metadata_list):
             raise ValidationError(
                 {
                     "input": ValidationError(
@@ -90,8 +90,7 @@ class BaseMetadataMutation(BaseMutation):
         type_name, object_pk = from_global_id_or_error(object_id)
         model = cls.get_model_for_type_name(info, type_name)
         cls.validate_model_is_model_with_metadata(model, object_id)
-        permission = cls._meta.permission_map.get(type_name)
-        if permission:
+        if permission := cls._meta.permission_map.get(type_name):
             return permission(info, object_pk)
         raise NotImplementedError(
             f"Couldn't resolve permission to item: {object_id}. "
@@ -125,8 +124,7 @@ class BaseMetadataMutation(BaseMutation):
         """Run extra metadata method based on mutating model."""
         type_name, _ = from_global_id_or_error(data["id"])
         if MODEL_EXTRA_METHODS.get(type_name):
-            prefetch_method = MODEL_EXTRA_PREFETCH.get(type_name)
-            if prefetch_method:
+            if prefetch_method := MODEL_EXTRA_PREFETCH.get(type_name):
                 data["qs"] = prefetch_method()
             instance = cls.get_instance(info, **data)
             MODEL_EXTRA_METHODS[type_name](instance, info, **data)
@@ -136,17 +134,15 @@ class BaseMetadataMutation(BaseMutation):
         """Return a success response."""
         # Wrap the instance with ChannelContext for models that use it.
         use_channel_context = any(
-            [
-                isinstance(instance, Model)
-                for Model in [
-                    product_models.Product,
-                    product_models.ProductVariant,
-                    product_models.Collection,
-                    shipping_models.ShippingMethod,
-                    shipping_models.ShippingZone,
-                    menu_models.Menu,
-                    menu_models.MenuItem,
-                ]
+            isinstance(instance, Model)
+            for Model in [
+                product_models.Product,
+                product_models.ProductVariant,
+                product_models.Collection,
+                shipping_models.ShippingMethod,
+                shipping_models.ShippingZone,
+                menu_models.Menu,
+                menu_models.MenuItem,
             ]
         )
         if use_channel_context:

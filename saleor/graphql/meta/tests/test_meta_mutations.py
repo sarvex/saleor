@@ -700,7 +700,7 @@ def test_update_public_metadata_for_item(api_client, checkout):
 
 def test_update_public_metadata_for_non_exist_item(api_client):
     # given
-    checkout_id = "Checkout:" + str(uuid.uuid4())
+    checkout_id = f"Checkout:{str(uuid.uuid4())}"
     checkout_id = base64.b64encode(str.encode(checkout_id)).decode("utf-8")
 
     # when
@@ -1346,7 +1346,7 @@ def test_delete_public_metadata_for_menu_item(
 
 def test_delete_public_metadata_for_non_exist_item(api_client):
     # given
-    checkout_id = "Checkout:" + str(uuid.uuid4())
+    checkout_id = f"Checkout:{str(uuid.uuid4())}"
     checkout_id = base64.b64encode(str.encode(checkout_id)).decode("utf-8")
 
     # when
@@ -2067,7 +2067,7 @@ def test_update_private_metadata_for_non_exist_item(
     staff_api_client, permission_manage_checkouts
 ):
     # given
-    checkout_id = "Checkout:" + str(uuid.uuid4())
+    checkout_id = f"Checkout:{str(uuid.uuid4())}"
     checkout_id = base64.b64encode(str.encode(checkout_id)).decode("utf-8")
 
     # when
@@ -2735,7 +2735,7 @@ def test_delete_private_metadata_for_non_exist_item(
     staff_api_client, permission_manage_checkouts
 ):
     # given
-    checkout_id = "Checkout:" + str(uuid.uuid4())
+    checkout_id = f"Checkout:{str(uuid.uuid4())}"
     checkout_id = base64.b64encode(str.encode(checkout_id)).decode("utf-8")
 
     # when

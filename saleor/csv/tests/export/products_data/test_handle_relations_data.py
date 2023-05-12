@@ -197,7 +197,7 @@ def test_prepare_products_relations_data(
     )
     images = ", ".join(
         [
-            "http://mirumee.com/media/" + image.image.name
+            f"http://mirumee.com/media/{image.image.name}"
             for image in product_with_image.media.all()
         ]
     )
@@ -564,7 +564,7 @@ def test_prepare_variants_relations_data(
         pk = variant.pk
         images = ", ".join(
             [
-                "http://mirumee.com/media/" + image.image.name
+                f"http://mirumee.com/media/{image.image.name}"
                 for image in variant.media.all()
             ]
         )
@@ -608,7 +608,7 @@ def test_prepare_variants_relations_data_only_fields(
     pk = variant.pk
     images = ", ".join(
         [
-            "http://mirumee.com/media/" + image.image.name
+            f"http://mirumee.com/media/{image.image.name}"
             for image in variant.media.all()
         ]
     )
@@ -755,7 +755,7 @@ def test_add_image_uris_to_data(product):
     result = add_image_uris_to_data(product.pk, image_path, field, input_data)
 
     # then
-    assert result[pk][field] == {"http://mirumee.com/media/" + image_path}
+    assert result[pk][field] == {f"http://mirumee.com/media/{image_path}"}
 
 
 def test_add_image_uris_to_data_update_images(product):
@@ -770,7 +770,10 @@ def test_add_image_uris_to_data_update_images(product):
     result = add_image_uris_to_data(product.pk, image_path, field, input_data)
 
     # then
-    assert result[pk][field] == {"http://mirumee.com/media/" + image_path, old_path}
+    assert result[pk][field] == {
+        f"http://mirumee.com/media/{image_path}",
+        old_path,
+    }
 
 
 def test_add_image_uris_to_data_no_image_path(product):
@@ -915,7 +918,7 @@ def test_add_file_attribute_info_to_data(product):
 
     # then
     expected_header = f"{slug} (product attribute)"
-    assert result[pk][expected_header] == {"http://mirumee.com/media/" + test_url}
+    assert result[pk][expected_header] == {f"http://mirumee.com/media/{test_url}"}
 
 
 def test_add_rich_text_attribute_info_to_data(product):

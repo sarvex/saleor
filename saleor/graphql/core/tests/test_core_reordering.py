@@ -149,7 +149,7 @@ def test_reordering_out_of_bound(sorted_entries_seq):
             (nodes[2].pk, 2),
             (nodes[3].pk, 3),
             (nodes[4].pk, 4),
-            (nodes[5].pk, 5 - 5),
+            (nodes[5].pk, 0),
         ]
     )
 

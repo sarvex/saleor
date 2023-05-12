@@ -64,4 +64,4 @@ class GiftCard(models.Model):
 
     @property
     def display_code(self):
-        return "****%s" % self.code[-4:]
+        return f"****{self.code[-4:]}"

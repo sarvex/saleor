@@ -13,8 +13,9 @@ def ensure_can_manage_permissions(requestor, permission_items):
     """
     if requestor_is_superuser(requestor):
         return
-    missing_permissions = get_out_of_scope_permissions(requestor, permission_items)
-    if missing_permissions:
+    if missing_permissions := get_out_of_scope_permissions(
+        requestor, permission_items
+    ):
         error_msg = "You can't add permission that you don't have."
         code = AppErrorCode.OUT_OF_SCOPE_PERMISSION.value
         params = {"permissions": missing_permissions}

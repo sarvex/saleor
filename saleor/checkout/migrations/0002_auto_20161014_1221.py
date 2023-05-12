@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 from django.db import migrations
 
 
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -19,6 +21,6 @@ class Migration(migrations.Migration):
             model_name="cartline", old_name="product", new_name="variant"
         ),
         migrations.AlterUniqueTogether(
-            name="cartline", unique_together=set([("cart", "variant", "data")])
+            name="cartline", unique_together={("cart", "variant", "data")}
         ),
     ]

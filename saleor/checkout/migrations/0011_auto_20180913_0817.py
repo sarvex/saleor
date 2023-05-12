@@ -7,8 +7,8 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-    def populate_data(apps, schema_editor):
-        CartLine = apps.get_model("checkout", "CartLine")
+    def populate_data(self, schema_editor):
+        CartLine = self.get_model("checkout", "CartLine")
         for cart_line in CartLine.objects.all():
             if isinstance(cart_line.data, str):
                 json_str = cart_line.data

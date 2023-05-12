@@ -35,19 +35,17 @@ def decrease_voucher_usage(voucher: "Voucher") -> None:
 
 
 def add_voucher_usage_by_customer(voucher: "Voucher", customer_email: str) -> None:
-    voucher_customer = VoucherCustomer.objects.filter(
+    if voucher_customer := VoucherCustomer.objects.filter(
         voucher=voucher, customer_email=customer_email
-    )
-    if voucher_customer:
+    ):
         raise NotApplicable("This offer is only valid once per customer.")
     VoucherCustomer.objects.create(voucher=voucher, customer_email=customer_email)
 
 
 def remove_voucher_usage_by_customer(voucher: "Voucher", customer_email: str) -> None:
-    voucher_customer = VoucherCustomer.objects.filter(
+    if voucher_customer := VoucherCustomer.objects.filter(
         voucher=voucher, customer_email=customer_email
-    )
-    if voucher_customer:
+    ):
         voucher_customer.delete()
 
 
@@ -58,12 +56,11 @@ def get_product_discount_on_sale(
     channel: "Channel",
 ):
     """Return discount value if product is on sale or raise NotApplicable."""
-    is_product_on_sale = (
+    if is_product_on_sale := (
         product.id in discount.product_ids
         or product.category_id in discount.category_ids
         or product_collections.intersection(discount.collection_ids)
-    )
-    if is_product_on_sale:
+    ):
         sale_channel_listing = discount.channel_listings.get(channel.slug)
         return discount.sale.get_discount(sale_channel_listing)  # type: ignore
     raise NotApplicable("Discount not applicable for this product")
@@ -77,7 +74,7 @@ def get_product_discounts(
     channel: "Channel"
 ) -> Money:
     """Return discount values for all discounts applicable to a product."""
-    product_collections = set(pc.id for pc in collections)
+    product_collections = {pc.id for pc in collections}
     for discount in discounts or []:
         try:
             yield get_product_discount_on_sale(
@@ -97,15 +94,14 @@ def calculate_discounted_price(
 ) -> Money:
     """Return minimum product's price of all prices with discounts applied."""
     if discounts:
-        discount_prices = list(
+        if discount_prices := list(
             get_product_discounts(
                 product=product,
                 collections=collections,
                 discounts=discounts,
                 channel=channel,
             )
-        )
-        if discount_prices:
+        ):
             price = min(discount(price) for discount in discount_prices)
     return price
 
@@ -174,8 +170,7 @@ def get_products_voucher_discount(
     if voucher.apply_once_per_order:
         return voucher.get_discount_amount_for(min(prices), channel)
     discounts = (voucher.get_discount_amount_for(price, channel) for price in prices)
-    total_amount = sum(discounts, zero_money(channel.currency_code))
-    return total_amount
+    return sum(discounts, zero_money(channel.currency_code))
 
 
 def fetch_categories(sale_pks: Iterable[str]) -> Dict[int, Set[int]]:

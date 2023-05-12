@@ -120,10 +120,7 @@ class AddressForm(forms.ModelForm):
         autocomplete_dict = defaultdict(lambda: "off", self.AUTOCOMPLETE_MAPPING)
         for field_name, field in self.fields.items():
             if autocomplete_type:
-                autocomplete = "%s %s" % (
-                    autocomplete_type,
-                    autocomplete_dict[field_name],
-                )
+                autocomplete = f"{autocomplete_type} {autocomplete_dict[field_name]}"
             else:
                 autocomplete = autocomplete_dict[field_name]
             field.widget.attrs["autocomplete"] = autocomplete
@@ -252,10 +249,10 @@ def update_base_fields(form_class, i18n_rules):
 
 
 def construct_address_form(country_code, i18n_rules):
-    class_name = "AddressForm%s" % country_code
+    class_name = f"AddressForm{country_code}"
     base_class = CountryAwareAddressForm
     form_kwargs = {
-        "Meta": type(str("Meta"), (base_class.Meta, object), {}),
+        "Meta": type("Meta", (base_class.Meta, object), {}),
         "formfield_callback": None,
     }
     class_ = type(base_class)(str(class_name), (base_class,), form_kwargs)

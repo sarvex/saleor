@@ -79,7 +79,6 @@ def get_view_payloads(path, language, headers):
 def report_view(client_id, path, language, headers):
     payloads = get_view_payloads(path, language, headers)
     extra_headers = {}
-    user_agent = headers.get("HTTP_USER_AGENT", None)
-    if user_agent:
+    if user_agent := headers.get("HTTP_USER_AGENT", None):
         extra_headers["user-agent"] = user_agent
     _report(client_id, payloads, extra_headers=extra_headers)

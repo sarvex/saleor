@@ -175,7 +175,9 @@ def test_refresh_token_when_incorrect_token(api_client, customer_user):
     refresh_token = create_refresh_token(customer_user, {"csrfToken": csrf_token})
 
     variables = {"token": None, "csrf_token": csrf_token}
-    api_client.cookies[JWT_REFRESH_TOKEN_COOKIE_NAME] = refresh_token + "wrong-token"
+    api_client.cookies[
+        JWT_REFRESH_TOKEN_COOKIE_NAME
+    ] = f"{refresh_token}wrong-token"
     api_client.cookies[JWT_REFRESH_TOKEN_COOKIE_NAME]["httponly"] = True
 
     response = api_client.post_graphql(MUTATION_TOKEN_REFRESH, variables)

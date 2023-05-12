@@ -42,7 +42,7 @@ from ..tests.utils import convert_dict_keys_to_camel_case
 
 @pytest.fixture
 def query_customer_with_filter():
-    query = """
+    return """
     query ($filter: CustomerFilterInput!, ) {
         customers(first: 5, filter: $filter) {
             totalCount
@@ -56,12 +56,11 @@ def query_customer_with_filter():
         }
     }
     """
-    return query
 
 
 @pytest.fixture
 def query_staff_users_with_filter():
-    query = """
+    return """
     query ($filter: StaffUserInput!, ) {
         staffUsers(first: 5, filter: $filter) {
             totalCount
@@ -75,7 +74,6 @@ def query_staff_users_with_filter():
         }
     }
     """
-    return query
 
 
 FULL_USER_QUERY = """
@@ -673,7 +671,7 @@ def test_query_customers(staff_api_client, user_api_client, permission_manage_us
     content = get_graphql_content(response)
     users = content["data"]["customers"]["edges"]
     assert users
-    assert all([not user["node"]["isStaff"] for user in users])
+    assert all(not user["node"]["isStaff"] for user in users)
 
     # check permissions
     response = user_api_client.post_graphql(query, variables)
@@ -704,7 +702,7 @@ def test_query_staff(
     assert len(data) == 2
     staff_emails = [user["node"]["email"] for user in data]
     assert sorted(staff_emails) == [admin_user.email, staff_user.email]
-    assert all([user["node"]["isStaff"] for user in data])
+    assert all(user["node"]["isStaff"] for user in data)
 
     # check permissions
     response = user_api_client.post_graphql(query, variables)
@@ -878,7 +876,7 @@ def test_me_checkout_tokens_without_channel_param_inactive_channel(
     content = get_graphql_content(response)
     data = content["data"]["me"]
     assert str(checkouts[0].token) in data["checkoutTokens"]
-    assert not str(checkouts[1].token) in data["checkoutTokens"]
+    assert str(checkouts[1].token) not in data["checkoutTokens"]
 
 
 def test_me_checkout_tokens_with_channel(
@@ -896,7 +894,7 @@ def test_me_checkout_tokens_with_channel(
     content = get_graphql_content(response)
     data = content["data"]["me"]
     assert str(checkouts[0].token) in data["checkoutTokens"]
-    assert not str(checkouts[1].token) in data["checkoutTokens"]
+    assert str(checkouts[1].token) not in data["checkoutTokens"]
 
 
 def test_me_checkout_tokens_with_inactive_channel(
@@ -1233,7 +1231,7 @@ def test_customer_create(
         channel_slug=channel_PLN.slug,
     )
 
-    assert set([shipping_address, billing_address]) == set(new_user.addresses.all())
+    assert {shipping_address, billing_address} == set(new_user.addresses.all())
     customer_creation_event = account_events.CustomerEvent.objects.get()
     assert customer_creation_event.type == account_events.CustomerEvents.ACCOUNT_CREATED
     assert customer_creation_event.user == new_customer
@@ -3655,7 +3653,7 @@ def test_account_confirmation(
     assert content["data"]["confirmAccount"]["user"]["email"] == customer_user.email
     customer_user.refresh_from_db()
     match_orders_with_new_user_mock.assert_called_once_with(customer_user)
-    assert customer_user.is_active is True
+    assert customer_user.is_active
 
 
 @freeze_time("2018-05-31 12:00:01")

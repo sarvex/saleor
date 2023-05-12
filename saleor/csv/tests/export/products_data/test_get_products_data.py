@@ -35,19 +35,21 @@ def test_get_products_data(product, product_with_image, collection, image, chann
     VariantMedia.objects.create(variant=variant, media=product.media.first())
 
     products = Product.objects.all()
-    export_fields = set(
+    export_fields = {
         value
         for mapping in ProductExportFields.HEADERS_TO_FIELDS_MAPPING.values()
         for value in mapping.values()
-    )
+    }
     warehouse_ids = [str(warehouse.pk) for warehouse in Warehouse.objects.all()]
     attribute_ids = [str(attr.pk) for attr in Attribute.objects.all()]
     channel_ids = [str(channel.pk) for channel in Channel.objects.all()]
 
     variants = []
     for variant in product.variants.all():
-        for attr in variant.attributes.all():
-            attribute_ids.append(str(attr.assignment.attribute.pk))
+        attribute_ids.extend(
+            str(attr.assignment.attribute.pk)
+            for attr in variant.attributes.all()
+        )
         variant.weight = Weight(kg=3)
         variants.append(variant)
 
@@ -75,19 +77,15 @@ def test_get_products_data(product, product_with_image, collection, image, chann
             "category__slug": product.category.slug,
             "product_type__name": product.product_type.name,
             "charge_taxes": product.charge_taxes,
-            "collections__slug": (
-                ""
-                if not product.collections.all()
-                else product.collections.first().slug
-            ),
-            "product_weight": (
-                "{} g".format(int(product.weight.value)) if product.weight else ""
-            ),
-            "media__image": (
-                ""
-                if not product.media.all()
-                else "http://mirumee.com{}".format(product.media.first().image.url)
-            ),
+            "collections__slug": ""
+            if not product.collections.all()
+            else product.collections.first().slug,
+            "product_weight": f"{int(product.weight.value)} g"
+            if product.weight
+            else "",
+            "media__image": ""
+            if not product.media.all()
+            else f"http://mirumee.com{product.media.first().image.url}",
         }
 
         product_data = add_product_attribute_data_to_expected_data(
@@ -100,16 +98,14 @@ def test_get_products_data(product, product_with_image, collection, image, chann
         for variant in product.variants.all():
             data = {
                 "variants__sku": variant.sku,
-                "variants__media__image": (
-                    ""
-                    if not variant.media.all()
-                    else "http://mirumee.com{}".format(variant.media.first().image.url)
-                ),
-                "variant_weight": (
-                    "{} g".foramt(int(variant.weight.value)) if variant.weight else ""
-                ),
+                "variants__media__image": ""
+                if not variant.media.all()
+                else f"http://mirumee.com{variant.media.first().image.url}",
+                "variant_weight": "{} g".foramt(int(variant.weight.value))
+                if variant.weight
+                else "",
             }
-            data.update(product_data)
+            data |= product_data
 
             data = add_stocks_to_expected_data(data, variant, warehouse_ids)
             data = add_variant_attribute_data_to_expected_data(
@@ -148,7 +144,7 @@ def test_get_products_data_for_specified_attributes(
 
         for variant in product.variants.all():
             data = {}
-            data.update(product_data)
+            data |= product_data
             data["variants__sku"] = variant.sku
             data = add_variant_attribute_data_to_expected_data(
                 data, variant, attribute_ids
@@ -183,9 +179,7 @@ def test_get_products_data_for_specified_warehouses(
         product_data = {"id": id}
 
         for variant in product.variants.all():
-            data = {"variants__sku": variant.sku}
-            data.update(product_data)
-
+            data = {"variants__sku": variant.sku} | product_data
             data = add_stocks_to_expected_data(data, variant, warehouse_ids)
 
             expected_data.append(data)
@@ -218,9 +212,7 @@ def test_get_products_data_for_product_without_channel(
         product_data = {"id": id}
 
         for variant in product.variants.all():
-            data = {"variants__sku": variant.sku}
-            data.update(product_data)
-
+            data = {"variants__sku": variant.sku} | product_data
             data = add_stocks_to_expected_data(data, variant, warehouse_ids)
 
             expected_data.append(data)
@@ -367,7 +359,7 @@ def test_get_products_data_for_specified_warehouses_channels_and_attributes(
 
         for variant in product.variants.all():
             data = {"variants__sku": variant.sku}
-            data.update(product_data)
+            data |= product_data
 
             data = add_stocks_to_expected_data(data, variant, warehouse_ids)
             data = add_variant_attribute_data_to_expected_data(

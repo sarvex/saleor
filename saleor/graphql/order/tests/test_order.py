@@ -49,7 +49,7 @@ from ..utils import validate_draft_order
 
 @pytest.fixture
 def orders_query_with_filter():
-    query = """
+    return """
       query ($filter: OrderFilterInput!, ) {
         orders(first: 5, filter:$filter) {
           totalCount
@@ -61,12 +61,11 @@ def orders_query_with_filter():
         }
       }
     """
-    return query
 
 
 @pytest.fixture
 def draft_orders_query_with_filter():
-    query = """
+    return """
       query ($filter: OrderDraftFilterInput!, ) {
         draftOrders(first: 5, filter:$filter) {
           totalCount
@@ -78,7 +77,6 @@ def draft_orders_query_with_filter():
         }
       }
     """
-    return query
 
 
 @pytest.fixture
@@ -1165,8 +1163,8 @@ def test_related_order_events_query(
 
     data = content["data"]["orders"]["edges"]
     for order_data in data:
-        events_data = order_data["node"]["events"]
         if order_data["node"]["id"] != related_order_id:
+            events_data = order_data["node"]["events"]
             assert events_data[0]["relatedOrder"]["id"] == related_order_id
 
 
@@ -3613,9 +3611,9 @@ def test_order_update(
     order.user = None
     order.save()
     email = "not_default@example.com"
-    assert not order.user_email == email
-    assert not order.shipping_address.first_name == graphql_address_data["firstName"]
-    assert not order.billing_address.last_name == graphql_address_data["lastName"]
+    assert order.user_email != email
+    assert order.shipping_address.first_name != graphql_address_data["firstName"]
+    assert order.billing_address.last_name != graphql_address_data["lastName"]
     order_id = graphene.Node.to_global_id("Order", order.id)
     variables = {"id": order_id, "email": email, "address": graphql_address_data}
     response = staff_api_client.post_graphql(
@@ -3925,7 +3923,7 @@ def test_order_capture(
     payment_status_display = dict(ChargeStatus.CHOICES).get(ChargeStatus.FULLY_CHARGED)
     assert data["paymentStatusDisplay"] == payment_status_display
     assert data["isPaid"]
-    assert data["totalCaptured"]["amount"] == float(amount)
+    assert data["totalCaptured"]["amount"] == amount
 
     event_captured, event_order_fully_paid = order.events.all()
 
@@ -5586,22 +5584,22 @@ def test_query_orders_with_sort(
     address3 = address.get_copy()
     address3.last_name = "Alice"
     address3.save()
-    created_orders.append(
-        Order.objects.create(
-            token=str(uuid.uuid4()),
-            billing_address=address3,
-            status=OrderStatus.CANCELED,
-            total=TaxedMoney(net=Money(20, "USD"), gross=Money(26, "USD")),
-            channel=channel_USD,
-        )
-    )
-    created_orders.append(
-        Order.objects.create(
-            token=str(uuid.uuid4()),
-            billing_address=None,
-            status=OrderStatus.UNCONFIRMED,
-            total=TaxedMoney(net=Money(60, "USD"), gross=Money(80, "USD")),
-            channel=channel_USD,
+    created_orders.extend(
+        (
+            Order.objects.create(
+                token=str(uuid.uuid4()),
+                billing_address=address3,
+                status=OrderStatus.CANCELED,
+                total=TaxedMoney(net=Money(20, "USD"), gross=Money(26, "USD")),
+                channel=channel_USD,
+            ),
+            Order.objects.create(
+                token=str(uuid.uuid4()),
+                billing_address=None,
+                status=OrderStatus.UNCONFIRMED,
+                total=TaxedMoney(net=Money(60, "USD"), gross=Money(80, "USD")),
+                channel=channel_USD,
+            ),
         )
     )
     variables = {"sort_by": order_sort}

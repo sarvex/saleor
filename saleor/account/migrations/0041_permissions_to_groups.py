@@ -31,9 +31,7 @@ def get_counter_value(Group):
     """Get the number of next potential group."""
     pattern = r"^Group (\d+)$"
     group = Group.objects.filter(name__iregex=pattern).order_by("name").last()
-    if not group:
-        return 1
-    return int(re.match(pattern, group.name).group(1)) + 1
+    return 1 if not group else int(re.match(pattern, group.name)[1]) + 1
 
 
 def create_permissions_mapping(User):
@@ -43,7 +41,7 @@ def create_permissions_mapping(User):
 
     for user in users:
         permissions = user.user_permissions.all().order_by("pk")
-        perm_pks = tuple([perm.pk for perm in permissions])
+        perm_pks = tuple(perm.pk for perm in permissions)
         mapping[perm_pks].add(user.pk)
         user.user_permissions.clear()
     return mapping

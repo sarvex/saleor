@@ -103,8 +103,7 @@ class PageCreate(ModelMutation):
     def _save_m2m(cls, info, instance, cleaned_data):
         super()._save_m2m(info, instance, cleaned_data)
 
-        attributes = cleaned_data.get("attributes")
-        if attributes:
+        if attributes := cleaned_data.get("attributes"):
             AttributeAssignmentMixin.save(instance, attributes)
 
     @classmethod
@@ -190,12 +189,11 @@ class PageTypeMixin:
         Raise an error if any of the attributes are not page attribute.
         """
         if attributes:
-            not_valid_attributes = [
+            if not_valid_attributes := [
                 graphene.Node.to_global_id("Attribute", attr.pk)
                 for attr in attributes
                 if attr.type != AttributeType.PAGE_TYPE
-            ]
-            if not_valid_attributes:
+            ]:
                 error = ValidationError(
                     "Only page type attributes allowed.",
                     code=PageErrorCode.INVALID.value,
@@ -263,10 +261,9 @@ class PageTypeUpdate(PageTypeMixin, ModelMutation):
     @classmethod
     def clean_input(cls, info, instance, data):
         errors = defaultdict(list)
-        error = check_for_duplicates(
+        if error := check_for_duplicates(
             data, "add_attributes", "remove_attributes", "attributes"
-        )
-        if error:
+        ):
             error.code = PageErrorCode.DUPLICATED_INPUT_ITEM.value
             errors["attributes"].append(error)
 

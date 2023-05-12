@@ -568,7 +568,7 @@ def test_checkout_get_total_with_gift_card(api_client, checkout_with_item, gift_
 
     assert not data["errors"]
     assert data["checkout"]["token"] == str(checkout_with_item.token)
-    assert not data["checkout"]["giftCards"] == []
+    assert data["checkout"]["giftCards"] != []
     assert data["checkout"]["totalPrice"]["gross"]["amount"] == total_with_gift_card
 
 
@@ -610,7 +610,7 @@ def test_checkout_get_total_with_more_money_on_gift_card(
 
     assert not data["errors"]
     assert data["checkout"]["token"] == str(checkout_with_item.token)
-    assert not data["checkout"]["giftCards"] == []
+    assert data["checkout"]["giftCards"] != []
     assert data["checkout"]["totalPrice"]["gross"]["amount"] == 0
 
 

@@ -221,8 +221,7 @@ class StaffCreate(ModelMutation):
             return
         groups = cleaned_input[field]
         user_editable_groups = get_groups_which_user_can_manage(requestor)
-        out_of_scope_groups = set(groups) - set(user_editable_groups)
-        if out_of_scope_groups:
+        if out_of_scope_groups := set(groups) - set(user_editable_groups):
             # add error
             ids = [
                 graphene.Node.to_global_id("Group", group.pk)
@@ -254,8 +253,7 @@ class StaffCreate(ModelMutation):
     @traced_atomic_transaction()
     def _save_m2m(cls, info, instance, cleaned_data):
         super()._save_m2m(info, instance, cleaned_data)
-        groups = cleaned_data.get("add_groups")
-        if groups:
+        if groups := cleaned_data.get("add_groups"):
             instance.groups.add(*groups)
 
 
@@ -283,14 +281,13 @@ class StaffUpdate(StaffCreate):
             code = AccountErrorCode.OUT_OF_SCOPE_USER.value
             raise ValidationError({"id": ValidationError(msg, code=code)})
 
-        error = check_for_duplicates(data, "add_groups", "remove_groups", "groups")
-        if error:
+        if error := check_for_duplicates(
+            data, "add_groups", "remove_groups", "groups"
+        ):
             error.code = AccountErrorCode.DUPLICATED_INPUT_ITEM.value
             raise error
 
-        cleaned_input = super().clean_input(info, instance, data)
-
-        return cleaned_input
+        return super().clean_input(info, instance, data)
 
     @classmethod
     def clean_groups(cls, requestor: models.User, cleaned_input: dict, errors: dict):
@@ -359,10 +356,9 @@ class StaffUpdate(StaffCreate):
         """
         if requestor.is_superuser:
             return
-        permissions = get_not_manageable_permissions_when_deactivate_or_remove_users(
+        if permissions := get_not_manageable_permissions_when_deactivate_or_remove_users(
             [user]
-        )
-        if permissions:
+        ):
             # add error
             msg = (
                 "Users cannot be deactivated, some of permissions "
@@ -377,11 +373,9 @@ class StaffUpdate(StaffCreate):
     @traced_atomic_transaction()
     def _save_m2m(cls, info, instance, cleaned_data):
         super()._save_m2m(info, instance, cleaned_data)
-        add_groups = cleaned_data.get("add_groups")
-        if add_groups:
+        if add_groups := cleaned_data.get("add_groups"):
             instance.groups.add(*add_groups)
-        remove_groups = cleaned_data.get("remove_groups")
-        if remove_groups:
+        if remove_groups := cleaned_data.get("remove_groups"):
             instance.groups.remove(*remove_groups)
 
 

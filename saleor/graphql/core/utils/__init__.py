@@ -22,8 +22,7 @@ Image.init()
 
 def clean_seo_fields(data):
     """Extract and assign seo fields to given dictionary."""
-    seo_fields = data.pop("seo", None)
-    if seo_fields:
+    if seo_fields := data.pop("seo", None):
         data["seo_title"] = seo_fields.get("title")
         data["seo_description"] = seo_fields.get("description")
 
@@ -118,9 +117,7 @@ def validate_slug_value(cleaned_input, slug_field_name: str = "slug"):
 
 def get_duplicates_ids(first_list, second_list):
     """Return items that appear on both provided lists."""
-    if first_list and second_list:
-        return set(first_list) & set(second_list)
-    return []
+    return set(first_list) & set(second_list) if first_list and second_list else []
 
 
 def get_duplicated_values(values):
@@ -149,13 +146,14 @@ def from_global_id_or_error(
     """
     try:
         _type, _id = graphene.Node.from_global_id(id)
-    except (binascii.Error, UnicodeDecodeError, ValueError):
+    except (binascii.Error, ValueError):
         raise GraphQLError(f"Couldn't resolve id: {id}.")
 
     if only_type and str(_type) != str(only_type):
-        if not raise_error:
+        if raise_error:
+            raise GraphQLError(f"Must receive a {only_type} id.")
+        else:
             return _type, None
-        raise GraphQLError(f"Must receive a {only_type} id.")
     return _type, _id
 
 

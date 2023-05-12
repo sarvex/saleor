@@ -57,8 +57,7 @@ class GiftCardCreate(ModelMutation):
             raise PromoCodeAlreadyExists(code=GiftCardErrorCode.ALREADY_EXISTS)
         cleaned_input = super().clean_input(info, instance, data)
 
-        balance = cleaned_input.get("balance", None)
-        if balance:
+        if balance := cleaned_input.get("balance", None):
             try:
                 validate_price_precision(balance, instance.currency)
             except ValidationError as error:
@@ -67,8 +66,7 @@ class GiftCardCreate(ModelMutation):
             cleaned_input["current_balance_amount"] = balance
             cleaned_input["initial_balance_amount"] = balance
 
-        user_email = data.get("user_email", None)
-        if user_email:
+        if user_email := data.get("user_email", None):
             try:
                 cleaned_input["user"] = User.objects.get(email=user_email)
             except ObjectDoesNotExist:

@@ -141,17 +141,13 @@ class Payment(CountableDjangoObjectType):
     @traced_resolver
     def resolve_available_refund_amount(root: models.Payment, _info):
         # FIXME TESTME
-        if not root.can_refund():
-            return None
-        return root.get_captured_amount()
+        return None if not root.can_refund() else root.get_captured_amount()
 
     @staticmethod
     @traced_resolver
     def resolve_available_capture_amount(root: models.Payment, _info):
         # FIXME TESTME
-        if not root.can_capture():
-            return None
-        return root.get_charge_amount()
+        return None if not root.can_capture() else root.get_charge_amount()
 
     @staticmethod
     @traced_resolver
@@ -163,9 +159,7 @@ class Payment(CountableDjangoObjectType):
             "first_digits": root.cc_first_digits,
             "last_digits": root.cc_last_digits,
         }
-        if not any(data.values()):
-            return None
-        return CreditCard(**data)
+        return None if not any(data.values()) else CreditCard(**data)
 
 
 class PaymentInitialized(graphene.ObjectType):

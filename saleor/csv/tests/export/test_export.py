@@ -438,8 +438,10 @@ def test_append_to_file_for_xlsx(user_export_file, tmpdir, media_root):
     data = []
     for i in range(2, max_row + 1):
         row = []
-        for j in range(1, max_col + 1):
-            row.append(sheet_obj.cell(row=i, column=j).value)
+        row.extend(
+            sheet_obj.cell(row=i, column=j).value
+            for j in range(1, max_col + 1)
+        )
         data.append(row)
 
     assert headers == expected_headers
@@ -495,11 +497,8 @@ def test_export_products_in_batches_for_csv(
 
     expected_data = []
     for product in qs.order_by("pk"):
-        product_data = []
         id = graphene.Node.to_global_id("Product", product.pk)
-        product_data.append(id)
-        product_data.append(product.name)
-
+        product_data = [id, product.name]
         for variant in product.variants.all():
             product_data.append(str(variant.sku))
             expected_data.append(product_data)
@@ -564,12 +563,8 @@ def test_export_products_in_batches_for_xlsx(
     # then
     expected_data = []
     for product in qs.order_by("pk"):
-        product_data = []
         id = graphene.Node.to_global_id("Product", product.pk)
-        product_data.append(id)
-        product_data.append(product.name)
-        product_data.append(json.dumps(product.description))
-
+        product_data = [id, product.name, json.dumps(product.description)]
         for variant in product.variants.all():
             product_data.append(variant.sku)
             expected_data.append(product_data)
@@ -583,8 +578,10 @@ def test_export_products_in_batches_for_xlsx(
     data = []
     for i in range(2, max_row + 1):
         row = []
-        for j in range(1, max_col + 1):
-            row.append(sheet_obj.cell(row=i, column=j).value)
+        row.extend(
+            sheet_obj.cell(row=i, column=j).value
+            for j in range(1, max_col + 1)
+        )
         data.append(row)
 
     assert headers == expected_headers

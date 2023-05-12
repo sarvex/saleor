@@ -161,8 +161,7 @@ class BaseMutation(graphene.Mutation):
         """
         if qs is not None:
             return qs.filter(pk=pk).first()
-        get_node = getattr(graphene_type, "get_node", None)
-        if get_node:
+        if get_node := getattr(graphene_type, "get_node", None):
             return get_node(info, pk)
         return None
 
@@ -201,7 +200,8 @@ class BaseMutation(graphene.Mutation):
                 raise ValidationError(
                     {
                         field: ValidationError(
-                            "Couldn't resolve to a node: %s" % node_id, code="not_found"
+                            f"Couldn't resolve to a node: {node_id}",
+                            code="not_found",
                         )
                     }
                 )
@@ -259,12 +259,11 @@ class BaseMutation(graphene.Mutation):
             instance.full_clean()
         except ValidationError as error:
             if hasattr(cls._meta, "exclude"):
-                # Ignore validation errors for fields that are specified as
-                # excluded.
-                new_error_dict = {}
-                for field, errors in error.error_dict.items():
-                    if field not in cls._meta.exclude:
-                        new_error_dict[field] = errors
+                new_error_dict = {
+                    field: errors
+                    for field, errors in error.error_dict.items()
+                    if field not in cls._meta.exclude
+                }
                 error.error_dict = new_error_dict
 
             if cls._meta.errors_mapping:
@@ -323,8 +322,7 @@ class BaseMutation(graphene.Mutation):
             return True
         if context.user.has_perms(permissions):
             return True
-        app = getattr(context, "app", None)
-        if app:
+        if app := getattr(context, "app", None):
             # for now MANAGE_STAFF permission for app is not supported
             if AccountPermissions.MANAGE_STAFF in permissions:
                 return False
@@ -357,7 +355,7 @@ class BaseMutation(graphene.Mutation):
     def handle_typed_errors(cls, errors: list, **extra):
         """Return class instance with errors."""
         if cls._meta.error_type_field is not None:
-            extra.update({cls._meta.error_type_field: errors})
+            extra[cls._meta.error_type_field] = errors
         return cls(errors=errors, **extra)
 
 
@@ -396,7 +394,7 @@ class ModelMutation(BaseMutation):
         model_type = cls.get_type_for_model()
         if not model_type:
             raise ImproperlyConfigured(
-                "Unable to find type for model %s in graphene registry" % model.__name__
+                f"Unable to find type for model {model.__name__} in graphene registry"
             )
         fields = {return_field_name: graphene.Field(model_type)}
 
@@ -497,12 +495,11 @@ class ModelMutation(BaseMutation):
         qs = data.get("qs")
         if object_id:
             model_type = cls.get_type_for_model()
-            instance = cls.get_node_or_error(
+            return cls.get_node_or_error(
                 info, object_id, only_type=model_type, qs=qs
             )
         else:
-            instance = cls._meta.model()
-        return instance
+            return cls._meta.model()
 
     @classmethod
     def post_save_action(cls, info, instance, cleaned_input):

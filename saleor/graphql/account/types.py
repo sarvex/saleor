@@ -92,9 +92,7 @@ class Address(CountableDjangoObjectType):
         user_default_shipping_address_pk = getattr(
             root, "user_default_shipping_address_pk"
         )
-        if user_default_shipping_address_pk == root.pk:
-            return True
-        return False
+        return user_default_shipping_address_pk == root.pk
 
     @staticmethod
     @traced_resolver
@@ -112,9 +110,7 @@ class Address(CountableDjangoObjectType):
         user_default_billing_address_pk = getattr(
             root, "user_default_billing_address_pk"
         )
-        if user_default_billing_address_pk == root.pk:
-            return True
-        return False
+        return user_default_billing_address_pk == root.pk
 
     @staticmethod
     def __resolve_reference(root, _info, **_kwargs):
@@ -190,10 +186,9 @@ class UserPermission(Permission):
     @traced_resolver
     def resolve_source_permission_groups(root: Permission, _info, user_id, **_kwargs):
         _type, user_id = from_global_id_or_error(user_id, only_type="User")
-        groups = auth_models.Group.objects.filter(
+        return auth_models.Group.objects.filter(
             user__pk=user_id, permissions__name=root.name
         )
-        return groups
 
 
 @key("id")

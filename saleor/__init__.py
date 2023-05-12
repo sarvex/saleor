@@ -9,7 +9,7 @@ __version__ = "dev"
 def patched_print_object(type):
     interfaces = type.interfaces
     implemented_interfaces = (
-        " implements {}".format(" & ".join(i.name for i in interfaces))
+        f' implements {" & ".join(i.name for i in interfaces)}'
         if interfaces
         else ""
     )

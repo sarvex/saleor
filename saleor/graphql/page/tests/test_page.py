@@ -587,7 +587,7 @@ def test_create_page_with_file_attribute_new_attribute_value(
                 "reference": None,
                 "name": new_value,
                 "file": {
-                    "url": "http://testserver/media/" + new_value,
+                    "url": f"http://testserver/media/{new_value}",
                     "contentType": new_value_content_type,
                 },
             }
@@ -1302,7 +1302,7 @@ def test_update_page_with_file_attribute_value(
                 "name": new_value,
                 "reference": None,
                 "file": {
-                    "url": "http://testserver/media/" + new_value,
+                    "url": f"http://testserver/media/{new_value}",
                     "contentType": None,
                 },
             }

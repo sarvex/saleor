@@ -118,17 +118,19 @@ def test_get_channels_headers(channel_USD, channel_PLN):
     # then
     expected_headers = []
     for channel_slug in [channel_pln_slug, channel_usd_slug]:
-        for field in [
-            "product currency code",
-            "published",
-            "publication date",
-            "searchable",
-            "available for purchase",
-            "price amount",
-            "variant currency code",
-            "variant cost price",
-        ]:
-            expected_headers.append(f"{channel_slug} (channel {field})")
+        expected_headers.extend(
+            f"{channel_slug} (channel {field})"
+            for field in [
+                "product currency code",
+                "published",
+                "publication date",
+                "searchable",
+                "available for purchase",
+                "price amount",
+                "variant currency code",
+                "variant cost price",
+            ]
+        )
     assert channel_headers == expected_headers
 
 
@@ -191,18 +193,19 @@ def test_get_export_fields_and_headers_info(
     channel_headers = []
     for channel in Channel.objects.all().order_by("slug"):
         slug = channel.slug
-        for field in [
-            "product currency code",
-            "published",
-            "publication date",
-            "searchable",
-            "available for purchase",
-            "price amount",
-            "variant currency code",
-            "variant cost price",
-        ]:
-            channel_headers.append(f"{slug} (channel {field})")
-
+        channel_headers.extend(
+            f"{slug} (channel {field})"
+            for field in [
+                "product currency code",
+                "published",
+                "publication date",
+                "searchable",
+                "available for purchase",
+                "price amount",
+                "variant currency code",
+                "variant cost price",
+            ]
+        )
     excepted_headers = (
         expected_fields
         + product_headers

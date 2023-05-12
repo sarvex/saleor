@@ -26,7 +26,7 @@ def voucher_with_many_channels_and_countries(voucher_with_many_channels):
 
 @pytest.fixture
 def query_vouchers_with_filter():
-    query = """
+    return """
     query ($filter: VoucherFilterInput!, ) {
       vouchers(first:5, filter: $filter){
         edges{
@@ -39,12 +39,11 @@ def query_vouchers_with_filter():
       }
     }
     """
-    return query
 
 
 @pytest.fixture
 def query_sales_with_filter():
-    query = """
+    return """
     query ($filter: SaleFilterInput!, ) {
       sales(first:5, filter: $filter){
         edges{
@@ -57,7 +56,6 @@ def query_sales_with_filter():
       }
     }
     """
-    return query
 
 
 def test_voucher_query(

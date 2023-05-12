@@ -134,7 +134,7 @@ def test_get_group_permission_codes_group_without_permissions(
     permission_codes = get_group_permission_codes(group)
 
     assert len(permission_codes) == group.permissions.count()
-    assert set(permission_codes) == set()
+    assert not set(permission_codes)
 
 
 def test_get_user_permissions(permission_group_manage_users, permission_manage_orders):
@@ -240,7 +240,7 @@ def test_get_groups_which_user_can_manage_customer_user(
 
     group_result = get_groups_which_user_can_manage(customer_user)
 
-    assert set(group_result) == set()
+    assert not set(group_result)
 
 
 def test_get_out_of_scope_users_user_has_rights_to_manage_all_users(

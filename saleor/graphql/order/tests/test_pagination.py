@@ -15,7 +15,7 @@ from ...tests.utils import get_graphql_content
 
 @pytest.fixture()
 def orders_for_pagination(db, channel_USD):
-    orders = Order.objects.bulk_create(
+    return Order.objects.bulk_create(
         [
             Order(
                 token=str(uuid.uuid4()),
@@ -34,12 +34,11 @@ def orders_for_pagination(db, channel_USD):
             ),
         ]
     )
-    return orders
 
 
 @pytest.fixture()
 def draft_orders_for_pagination(db, channel_USD):
-    orders = Order.objects.bulk_create(
+    return Order.objects.bulk_create(
         [
             Order(
                 token=str(uuid.uuid4()),
@@ -61,7 +60,6 @@ def draft_orders_for_pagination(db, channel_USD):
             ),
         ]
     )
-    return orders
 
 
 QUERY_ORDERS_WITH_PAGINATION = """
@@ -167,7 +165,7 @@ def test_order_query_pagination_with_filter_created(
     orders = content["data"]["orders"]["edges"]
     total_count = content["data"]["orders"]["totalCount"]
 
-    for i in range(total_count if total_count < page_size else page_size):
+    for i in range(min(total_count, page_size)):
         assert orders[i]["node"]["total"]["gross"]["amount"] == orders_order[i]
 
     assert expected_total_count == total_count
@@ -224,7 +222,7 @@ def test_order_query_pagination_with_filter_payment_status(
     total_count = content["data"]["orders"]["totalCount"]
     assert total_count == expected_total_count
 
-    for i in range(total_count if total_count < page_size else page_size):
+    for i in range(min(total_count, page_size)):
         assert orders[i]["node"]["total"]["gross"]["amount"] == orders_order[i]
 
 
@@ -260,7 +258,7 @@ def test_order_query_pagination_with_filter_status(
     total_count = content["data"]["orders"]["totalCount"]
     assert total_count == expected_total_count
 
-    for i in range(total_count if total_count < page_size else page_size):
+    for i in range(min(total_count, page_size)):
         assert orders[i]["node"]["total"]["gross"]["amount"] == orders_order[i]
 
 
@@ -386,7 +384,7 @@ def test_draft_order_query_pagination_with_filter_created(
     orders = content["data"]["draftOrders"]["edges"]
     total_count = content["data"]["draftOrders"]["totalCount"]
 
-    for i in range(total_count if total_count < page_size else page_size):
+    for i in range(min(total_count, page_size)):
         assert orders[i]["node"]["total"]["gross"]["amount"] == orders_order[i]
 
     assert expected_total_count == total_count
@@ -463,7 +461,7 @@ def test_orders_query_pagination_with_filter_search(
     total_count = content["data"]["orders"]["totalCount"]
 
     assert expected_total_count == total_count
-    for i in range(total_count if total_count < page_size else page_size):
+    for i in range(min(total_count, page_size)):
         assert orders[i]["node"]["total"]["gross"]["amount"] == orders_order[i]
 
 
@@ -542,7 +540,7 @@ def test_draft_orders_query_pagination_with_filter_search(
     total_count = content["data"]["draftOrders"]["totalCount"]
 
     assert expected_total_count == total_count
-    for i in range(total_count if total_count < page_size else page_size):
+    for i in range(min(total_count, page_size)):
         assert orders[i]["node"]["total"]["gross"]["amount"] == orders_order[i]
 
 

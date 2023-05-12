@@ -8,6 +8,8 @@ from django.conf import settings
 from django.db import migrations, models
 
 
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -31,16 +33,30 @@ class Migration(migrations.Migration):
                         choices=[
                             ("open", "Open - currently active"),
                             ("payment", "Waiting for payment"),
-                            ("saved", "Saved - for items to be purchased later"),
-                            ("ordered", "Submitted - has been ordered at the checkout"),
-                            ("checkout", "Checkout - basket is processed in checkout"),
-                            ("canceled", "Canceled - basket was canceled by user"),
+                            (
+                                "saved",
+                                "Saved - for items to be purchased later",
+                            ),
+                            (
+                                "ordered",
+                                "Submitted - has been ordered at the checkout",
+                            ),
+                            (
+                                "checkout",
+                                "Checkout - basket is processed in checkout",
+                            ),
+                            (
+                                "canceled",
+                                "Canceled - basket was canceled by user",
+                            ),
                         ],
                     ),
                 ),
                 (
                     "created",
-                    models.DateTimeField(auto_now_add=True, verbose_name="created"),
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="created"
+                    ),
                 ),
                 (
                     "last_status_change",
@@ -48,7 +64,10 @@ class Migration(migrations.Migration):
                         auto_now_add=True, verbose_name="last status change"
                     ),
                 ),
-                ("email", models.EmailField(max_length=254, null=True, blank=True)),
+                (
+                    "email",
+                    models.EmailField(max_length=254, null=True, blank=True),
+                ),
                 (
                     "token",
                     models.UUIDField(
@@ -62,7 +81,9 @@ class Migration(migrations.Migration):
                 ("checkout_data", models.TextField(null=True, editable=False)),
                 (
                     "total",
-                    models.DecimalField(default=0, max_digits=12, decimal_places=2),
+                    models.DecimalField(
+                        default=0, max_digits=12, decimal_places=2
+                    ),
                 ),
                 ("quantity", models.PositiveIntegerField(default=0)),
                 (
@@ -86,7 +107,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"db_table": "cart_cart", "ordering": ("-last_status_change",)},
+            options={
+                "db_table": "cart_cart",
+                "ordering": ("-last_status_change",),
+            },
         ),
         migrations.CreateModel(
             name="CartLine",
@@ -132,6 +156,6 @@ class Migration(migrations.Migration):
             options={"db_table": "cart_cartline"},
         ),
         migrations.AlterUniqueTogether(
-            name="cartline", unique_together=set([("cart", "product", "data")])
+            name="cartline", unique_together={("cart", "product", "data")}
         ),
     ]

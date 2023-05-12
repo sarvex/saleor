@@ -23,9 +23,7 @@ def resolve_access_token(info, root, **_kwargs):
         return None
 
     user = info.context.user
-    if user.is_anonymous:
-        return None
-    return create_access_token_for_app(root, user)
+    return None if user.is_anonymous else create_access_token_for_app(root, user)
 
 
 @traced_resolver

@@ -36,8 +36,7 @@ def configure_braintree():
 class Command(PopulateDBCommand):
     def handle(self, *args, **options):
         super().handle(*args, **options)
-        is_configured = configure_braintree()
-        if is_configured:
+        if is_configured := configure_braintree():
             self.stdout.write("Configured Braintree")
         else:
             self.stdout.write(

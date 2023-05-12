@@ -34,14 +34,12 @@ class DataLoader(BaseLoader, Generic[K, R]):
 
     def batch_load_fn(self, keys: Iterable[K]) -> Promise[List[R]]:
         with opentracing.global_tracer().start_active_span(
-            self.__class__.__name__
-        ) as scope:
+                self.__class__.__name__
+            ) as scope:
             span = scope.span
             span.set_tag(opentracing.tags.COMPONENT, "dataloaders")
             results = self.batch_load(keys)
-            if not isinstance(results, Promise):
-                return Promise.resolve(results)
-            return results
+            return results if isinstance(results, Promise) else Promise.resolve(results)
 
     def batch_load(self, keys: Iterable[K]) -> Union[Promise[List[R]], List[R]]:
         raise NotImplementedError()

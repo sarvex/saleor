@@ -46,7 +46,7 @@ class OrderDirection(graphene.Enum):
             return "Specifies an ascending sort order."
         if self == OrderDirection.DESC:
             return "Specifies a descending sort order."
-        raise ValueError("Unsupported enum value: %s" % self.value)
+        raise ValueError(f"Unsupported enum value: {self.value}")
 
 
 class ReportingPeriod(graphene.Enum):
@@ -70,13 +70,10 @@ def to_enum(enum_cls, *, type_name=None, **options) -> graphene.Enum:
     :return:
     """
 
-    # note this won't work until
-    # https://github.com/graphql-python/graphene/issues/956 is fixed
-    deprecation_reason = getattr(enum_cls, "__deprecation_reason__", None)
-    if deprecation_reason:
+    if deprecation_reason := getattr(enum_cls, "__deprecation_reason__", None):
         options.setdefault("deprecation_reason", deprecation_reason)
 
-    type_name = type_name or (enum_cls.__name__ + "Enum")
+    type_name = type_name or f"{enum_cls.__name__}Enum"
     enum_data = [(str_to_enum(code.upper()), code) for code, name in enum_cls.CHOICES]
     return graphene.Enum(type_name, enum_data, **options)
 

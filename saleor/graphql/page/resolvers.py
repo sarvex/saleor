@@ -11,11 +11,9 @@ def resolve_page(info, global_page_id=None, slug=None):
     user = info.context.user
 
     if slug is not None:
-        page = models.Page.objects.visible_to_user(user).filter(slug=slug).first()
-    else:
-        _type, page_pk = from_global_id_or_error(global_page_id, Page)
-        page = models.Page.objects.visible_to_user(user).filter(pk=page_pk).first()
-    return page
+        return models.Page.objects.visible_to_user(user).filter(slug=slug).first()
+    _type, page_pk = from_global_id_or_error(global_page_id, Page)
+    return models.Page.objects.visible_to_user(user).filter(pk=page_pk).first()
 
 
 @traced_resolver

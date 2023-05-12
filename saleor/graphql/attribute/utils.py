@@ -317,14 +317,12 @@ class AttributeAssignmentMixin:
                 )
             variant_validation = True
 
-        errors = validate_attributes_input(
+        if errors := validate_attributes_input(
             cleaned_input,
             attribute_qs,
             is_page_attributes=is_page_attributes,
             variant_validation=variant_validation,
-        )
-
-        if errors:
+        ):
             raise ValidationError(errors)
 
     @classmethod
@@ -611,11 +609,10 @@ def validate_reference_attributes_input(
 ):
     attribute_id = attr_values.global_id
     references = attr_values.references
-    if not references:
-        if is_value_required(attribute, variant_validation):
-            attribute_errors[AttributeInputErrors.ERROR_NO_REFERENCE_GIVEN].append(
-                attribute_id
-            )
+    if not references and is_value_required(attribute, variant_validation):
+        attribute_errors[AttributeInputErrors.ERROR_NO_REFERENCE_GIVEN].append(
+            attribute_id
+        )
 
 
 def validate_boolean_input(
@@ -624,10 +621,10 @@ def validate_boolean_input(
     attribute_errors: T_ERROR_DICT,
     variant_validation: bool,
 ):
-    attribute_id = attr_values.global_id
     value = attr_values.boolean
 
     if attribute.value_required and value is None:
+        attribute_id = attr_values.global_id
         attribute_errors[AttributeInputErrors.ERROR_BLANK_VALUE].append(attribute_id)
 
 
@@ -717,11 +714,9 @@ def validate_required_attributes(
 
     supplied_attribute_pk = [attribute.pk for attribute, _ in input_data]
 
-    missing_required_attributes = attribute_qs.filter(
+    if missing_required_attributes := attribute_qs.filter(
         Q(value_required=True) & ~Q(pk__in=supplied_attribute_pk)
-    )
-
-    if missing_required_attributes:
+    ):
         ids = [
             graphene.Node.to_global_id("Attribute", attr.pk)
             for attr in missing_required_attributes

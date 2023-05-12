@@ -66,9 +66,7 @@ def filter_updated_at(qs, _, value):
 
 
 def filter_status(qs, _, value):
-    if not value:
-        return qs
-    return qs.filter(status=value)
+    return qs if not value else qs.filter(status=value)
 
 
 def filter_metadata(qs, _, value):

@@ -79,8 +79,7 @@ def get_order_discount_event(discount_obj: dict):
     amount = prices.Money(Decimal(discount_obj["amount_value"]), currency)
 
     old_amount = None
-    old_amount_value = discount_obj.get("old_amount_value")
-    if old_amount_value:
+    if old_amount_value := discount_obj.get("old_amount_value"):
         old_amount = prices.Money(Decimal(old_amount_value), currency)
 
     return OrderEventDiscountObject(
@@ -288,12 +287,10 @@ class OrderEvent(CountableDjangoObjectType):
     @staticmethod
     @traced_resolver
     def resolve_fulfilled_items(root: models.OrderEvent, info):
-        fulfillment_lines_ids = root.parameters.get("fulfilled_items", [])
-
-        if not fulfillment_lines_ids:
+        if fulfillment_lines_ids := root.parameters.get("fulfilled_items", []):
+            return FulfillmentLinesByIdLoader(info.context).load_many(fulfillment_lines_ids)
+        else:
             return None
-
-        return FulfillmentLinesByIdLoader(info.context).load_many(fulfillment_lines_ids)
 
     @staticmethod
     @traced_resolver
@@ -313,17 +310,13 @@ class OrderEvent(CountableDjangoObjectType):
     @staticmethod
     def resolve_related_order(root: models.OrderEvent, info):
         order_pk = root.parameters.get("related_order_pk")
-        if not order_pk:
-            return None
-        return OrderByIdLoader(info.context).load(order_pk)
+        return None if not order_pk else OrderByIdLoader(info.context).load(order_pk)
 
     @staticmethod
     @traced_resolver
     def resolve_discount(root: models.OrderEvent, info):
         discount_obj = root.parameters.get("discount")
-        if not discount_obj:
-            return None
-        return get_order_discount_event(discount_obj)
+        return None if not discount_obj else get_order_discount_event(discount_obj)
 
 
 class FulfillmentLine(CountableDjangoObjectType):
@@ -1034,7 +1027,6 @@ class Order(CountableDjangoObjectType):
 
     @staticmethod
     @traced_resolver
-    # TODO: We should optimize it in/after PR#5819
     def resolve_available_shipping_methods(root: models.Order, info):
         available = get_valid_shipping_methods_for_order(root)
         if available is None:
@@ -1044,28 +1036,20 @@ class Order(CountableDjangoObjectType):
         display_gross = display_gross_prices()
         channel_slug = root.channel.slug
         for shipping_method in available:
-            # Ignore typing check because it is checked in
-            # get_valid_shipping_methods_for_order
-            shipping_channel_listing = shipping_method.channel_listings.filter(
+            if shipping_channel_listing := shipping_method.channel_listings.filter(
                 channel=root.channel
-            ).first()
-            if shipping_channel_listing:
+            ).first():
                 taxed_price = manager.apply_taxes_to_shipping(
                     shipping_channel_listing.price,
                     root.shipping_address,  # type: ignore
                     channel_slug,
                 )
-                if display_gross:
-                    shipping_method.price = taxed_price.gross
-                else:
-                    shipping_method.price = taxed_price.net
+                shipping_method.price = taxed_price.gross if display_gross else taxed_price.net
                 available_shipping_methods.append(shipping_method)
-        instances = [
+        return [
             ChannelContext(node=shipping, channel_slug=channel_slug)
             for shipping in available_shipping_methods
         ]
-
-        return instances
 
     @staticmethod
     @traced_resolver

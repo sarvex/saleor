@@ -19,8 +19,7 @@ def add_gift_card_code_to_checkout(checkout: Checkout, promo_code: str):
 
 def remove_gift_card_code_from_checkout(checkout: Checkout, gift_card_code: str):
     """Remove gift card data from checkout by code."""
-    gift_card = checkout.gift_cards.filter(code=gift_card_code).first()
-    if gift_card:
+    if gift_card := checkout.gift_cards.filter(code=gift_card_code).first():
         checkout.gift_cards.remove(gift_card)
 
 

@@ -13,8 +13,7 @@ from .types import AppType
 class AppQueryset(models.QuerySet):
     def for_event_type(self, event_type: str):
         permissions = {}
-        required_permission = WebhookEventType.PERMISSIONS.get(event_type)
-        if required_permission:
+        if required_permission := WebhookEventType.PERMISSIONS.get(event_type):
             app_label, codename = required_permission.value.split(".")
             permissions["permissions__content_type__app_label"] = app_label
             permissions["permissions__codename"] = codename

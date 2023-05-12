@@ -44,7 +44,8 @@ def test_sales_with_sorting_and_without_channel(
     assert [node["node"]["name"] for node in sales_nodes] == [sale.name, new_sale.name]
 
     assert any(
-        [str(warning.message) == DEPRECATION_WARNING_MESSAGE for warning in warns]
+        str(warning.message) == DEPRECATION_WARNING_MESSAGE
+        for warning in warns
     )
 
 
@@ -82,5 +83,6 @@ def test_query_vouchers_with_sort(
         voucher_with_high_min_spent_amount.name,
     ]
     assert any(
-        [str(warning.message) == DEPRECATION_WARNING_MESSAGE for warning in warns]
+        str(warning.message) == DEPRECATION_WARNING_MESSAGE
+        for warning in warns
     )

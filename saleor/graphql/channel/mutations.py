@@ -55,8 +55,7 @@ class ChannelCreate(ModelMutation):
     @classmethod
     def clean_input(cls, info, instance, data, input_cls=None):
         cleaned_input = super().clean_input(info, instance, data)
-        slug = cleaned_input.get("slug")
-        if slug:
+        if slug := cleaned_input.get("slug"):
             cleaned_input["slug"] = slugify(slug)
 
         return cleaned_input
@@ -65,8 +64,7 @@ class ChannelCreate(ModelMutation):
     @traced_atomic_transaction()
     def _save_m2m(cls, info, instance, cleaned_data):
         super()._save_m2m(info, instance, cleaned_data)
-        shipping_zones = cleaned_data.get("add_shipping_zones")
-        if shipping_zones:
+        if shipping_zones := cleaned_data.get("add_shipping_zones"):
             instance.shipping_zones.add(*shipping_zones)
 
 
@@ -101,16 +99,14 @@ class ChannelUpdate(ModelMutation):
 
     @classmethod
     def clean_input(cls, info, instance, data, input_cls=None):
-        error = check_for_duplicates(
+        if error := check_for_duplicates(
             data, "add_shipping_zones", "remove_shipping_zones", "shipping_zones"
-        )
-        if error:
+        ):
             error.code = ChannelErrorCode.DUPLICATED_INPUT_ITEM.value
             raise ValidationError({"shipping_zones": error})
 
         cleaned_input = super().clean_input(info, instance, data)
-        slug = cleaned_input.get("slug")
-        if slug:
+        if slug := cleaned_input.get("slug"):
             cleaned_input["slug"] = slugify(slug)
 
         return cleaned_input
@@ -119,11 +115,9 @@ class ChannelUpdate(ModelMutation):
     @traced_atomic_transaction()
     def _save_m2m(cls, info, instance, cleaned_data):
         super()._save_m2m(info, instance, cleaned_data)
-        add_shipping_zones = cleaned_data.get("add_shipping_zones")
-        if add_shipping_zones:
+        if add_shipping_zones := cleaned_data.get("add_shipping_zones"):
             instance.shipping_zones.add(*add_shipping_zones)
-        remove_shipping_zones = cleaned_data.get("remove_shipping_zones")
-        if remove_shipping_zones:
+        if remove_shipping_zones := cleaned_data.get("remove_shipping_zones"):
             instance.shipping_zones.remove(*remove_shipping_zones)
             shipping_channel_listings = instance.shipping_method_listings.filter(
                 shipping_method__shipping_zone__in=remove_shipping_zones
@@ -223,8 +217,7 @@ class ChannelDelete(ModelDeleteMutation):
     @classmethod
     def perform_mutation(cls, _root, info, **data):
         origin_channel = cls.get_node_or_error(info, data["id"], only_type=Channel)
-        target_channel_global_id = data.get("input", {}).get("channel_id")
-        if target_channel_global_id:
+        if target_channel_global_id := data.get("input", {}).get("channel_id"):
             target_channel = cls.get_node_or_error(
                 info, target_channel_global_id, only_type=Channel
             )
@@ -252,8 +245,9 @@ class BaseChannelListingMutation(BaseMutation):
         errors: ErrorType,
         error_code,
     ):
-        duplicated_ids = get_duplicates_ids(add_channels_ids, remove_channels_ids)
-        if duplicated_ids:
+        if duplicated_ids := get_duplicates_ids(
+            add_channels_ids, remove_channels_ids
+        ):
             error_msg = (
                 "The same object cannot be in both lists "
                 "for adding and removing items."
@@ -270,8 +264,7 @@ class BaseChannelListingMutation(BaseMutation):
     def validate_duplicated_channel_values(
         cls, channels_ids: Iterable[str], field_name: str, errors: ErrorType, error_code
     ):
-        duplicates = get_duplicated_values(channels_ids)
-        if duplicates:
+        if duplicates := get_duplicated_values(channels_ids):
             errors[field_name].append(
                 ValidationError(
                     "Duplicated channel ID.",

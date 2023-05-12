@@ -20,8 +20,7 @@ def resolve_orders(_info, channel_slug, **_kwargs):
 
 @traced_resolver
 def resolve_draft_orders(_info, **_kwargs):
-    qs = models.Order.objects.drafts()
-    return qs
+    return models.Order.objects.drafts()
 
 
 @traced_resolver

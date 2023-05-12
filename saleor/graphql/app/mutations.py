@@ -372,7 +372,7 @@ class AppInstall(ModelMutation):
         error_type_field = "app_errors"
 
     @classmethod
-    def clean_manifest_url(self, url):
+    def clean_manifest_url(cls, url):
         url_validator = AppURLValidator()
         try:
             url_validator(url)
@@ -471,12 +471,10 @@ class AppFetchManifest(BaseMutation):
 
     @classmethod
     def clean_permissions(cls, required_permissions: List[str]):
-        missing_permissions = []
         all_permissions = {perm[0]: perm[1] for perm in get_permissions_enum_list()}
-        for perm in required_permissions:
-            if not all_permissions.get(perm):
-                missing_permissions.append(perm)
-        if missing_permissions:
+        if missing_permissions := [
+            perm for perm in required_permissions if not all_permissions.get(perm)
+        ]:
             error_msg = "Given permissions don't exist"
             code = AppErrorCode.INVALID_PERMISSION.value
             params = {"permissions": missing_permissions}

@@ -19,20 +19,17 @@ def assing_permissions(apps, schema_editor):
 
 
 def get_default_currency(Checkout, Order, Product, ShippingMethod, Voucher):
-    latest_product = Product.objects.order_by("-pk").first()
-    if latest_product:
+    if latest_product := Product.objects.order_by("-pk").first():
         return latest_product.currency
-    latest_voucher = Voucher.objects.order_by("-pk").first()
-    if latest_voucher:
+    if latest_voucher := Voucher.objects.order_by("-pk").first():
         return latest_voucher.currency
-    latest_shipping_method = ShippingMethod.objects.order_by("-pk").first()
-    if latest_shipping_method:
+    if latest_shipping_method := ShippingMethod.objects.order_by(
+        "-pk"
+    ).first():
         return latest_shipping_method.currency
-    latest_order = Order.objects.order_by("-pk").first()
-    if latest_order:
+    if latest_order := Order.objects.order_by("-pk").first():
         return latest_order.currency
-    latest_checkout = Checkout.objects.order_by("-pk").first()
-    if latest_checkout:
+    if latest_checkout := Checkout.objects.order_by("-pk").first():
         return latest_checkout.currency
     return None
 
@@ -45,10 +42,9 @@ def create_default_channel(apps, schema_editor):
     ShippingMethod = apps.get_model("shipping", "ShippingMethod")
     Voucher = apps.get_model("discount", "Voucher")
 
-    default_currency = get_default_currency(
+    if default_currency := get_default_currency(
         Checkout, Order, Product, ShippingMethod, Voucher
-    )
-    if default_currency:
+    ):
         Channel.objects.create(
             name="Default channel",
             slug=settings.DEFAULT_CHANNEL_SLUG,

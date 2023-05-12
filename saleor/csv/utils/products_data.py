@@ -394,9 +394,8 @@ def add_attribute_info_to_data(
     to set with values.
     It returns updated data.
     """
-    slug = attribute_data.slug
     header = None
-    if slug:
+    if slug := attribute_data.slug:
         header = f"{slug} ({attribute_owner})"
         input_type = attribute_data.input_type
         if input_type == AttributeInputType.FILE:
@@ -440,8 +439,7 @@ def add_warehouse_info_to_data(
     It returns updated data.
     """
 
-    slug = warehouse_data["slug"]
-    if slug:
+    if slug := warehouse_data["slug"]:
         warehouse_qty_header = f"{slug} (warehouse quantity)"
         if warehouse_qty_header not in result_data[pk]:
             result_data[pk][warehouse_qty_header] = warehouse_data["qty"]
@@ -460,8 +458,7 @@ def add_channel_info_to_data(
     This functions adds info about channel to dict with product data.
     It returns updated data.
     """
-    slug = channel_data["slug"]
-    if slug:
+    if slug := channel_data["slug"]:
         for field in fields:
             header = f"{slug} (channel {field.replace('_', ' ')})"
             if header not in result_data[pk]:

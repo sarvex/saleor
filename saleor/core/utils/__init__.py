@@ -30,7 +30,7 @@ def build_absolute_uri(location: str) -> Optional[str]:
     """
     host = Site.objects.get_current().domain
     protocol = "https" if settings.ENABLE_SSL else "http"
-    current_uri = "%s://%s" % (protocol, host)
+    current_uri = f"{protocol}://{host}"
     location = urljoin(current_uri, location)
     return iri_to_uri(location)
 
@@ -71,8 +71,7 @@ def is_valid_ipv6(ip: str) -> bool:
 
 
 def get_currency_for_country(country_code: str):
-    currencies = get_territory_currencies(country_code)
-    if currencies:
+    if currencies := get_territory_currencies(country_code):
         return currencies[0]
     return os.environ.get("DEFAULT_CURRENCY", "USD")
 

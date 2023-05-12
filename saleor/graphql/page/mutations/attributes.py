@@ -51,12 +51,9 @@ class PageAttributeAssign(BaseMutation):
     ):
         """Ensure the attributes are page attributes and are not already assigned."""
 
-        # check if any attribute is not a page type
-        invalid_attributes = models.Attribute.objects.filter(pk__in=attr_pks).exclude(
-            type=AttributeType.PAGE_TYPE
-        )
-
-        if invalid_attributes:
+        if invalid_attributes := models.Attribute.objects.filter(
+            pk__in=attr_pks
+        ).exclude(type=AttributeType.PAGE_TYPE):
             invalid_attributes_ids = [
                 graphene.Node.to_global_id("Attribute", attr.pk)
                 for attr in invalid_attributes
@@ -68,12 +65,11 @@ class PageAttributeAssign(BaseMutation):
             )
             errors["attribute_ids"].append(error)
 
-        # check if any attribute is already assigned to this page type
-        assigned_attrs = models.Attribute.objects.get_assigned_page_type_attributes(
+        if assigned_attrs := models.Attribute.objects.get_assigned_page_type_attributes(
             page_type.pk
-        ).filter(pk__in=attr_pks)
-
-        if assigned_attrs:
+        ).filter(
+            pk__in=attr_pks
+        ):
             assigned_attributes_ids = [
                 graphene.Node.to_global_id("Attribute", attr.pk)
                 for attr in assigned_attrs

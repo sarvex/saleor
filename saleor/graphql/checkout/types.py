@@ -280,7 +280,7 @@ class Checkout(CountableDjangoObjectType):
         )
 
         def calculate_quantity(lines):
-            return sum([line_info.line.quantity for line_info in lines])
+            return sum(line_info.line.quantity for line_info in lines)
 
         return checkout_info.then(calculate_quantity)
 
@@ -377,7 +377,6 @@ class Checkout(CountableDjangoObjectType):
 
     @staticmethod
     @traced_resolver
-    # TODO: We should optimize it in/after PR#5819
     def resolve_available_shipping_methods(root: models.Checkout, info):
         def calculate_available_shipping_methods(data):
             address, lines, checkout_info, discounts, channel = data
@@ -411,10 +410,7 @@ class Checkout(CountableDjangoObjectType):
                         taxed_price = info.context.plugins.apply_taxes_to_shipping(
                             shipping_channel_listing.price, address, channel_slug
                         )
-                        if display_gross:
-                            shipping.price = taxed_price.gross
-                        else:
-                            shipping.price = taxed_price.net
+                        shipping.price = taxed_price.gross if display_gross else taxed_price.net
                         available_with_channel_context.append(
                             ChannelContext(node=shipping, channel_slug=channel_slug)
                         )
@@ -472,7 +468,7 @@ class Checkout(CountableDjangoObjectType):
             product_ids = [line_info.product.id for line_info in lines]
 
             def with_product_types(product_types):
-                return any([pt.is_shipping_required for pt in product_types])
+                return any(pt.is_shipping_required for pt in product_types)
 
             return (
                 ProductTypeByProductIdLoader(info.context)

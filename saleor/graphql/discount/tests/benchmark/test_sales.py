@@ -12,20 +12,20 @@ def sales_list(channel_USD, channel_PLN):
     values = [15, 5, 25]
     sale_channel_listings = []
     for sale, value in zip(sales, values):
-        sale_channel_listings.append(
-            SaleChannelListing(
-                sale=sale,
-                channel=channel_USD,
-                discount_value=value,
-                currency=channel_USD.currency_code,
-            )
-        )
-        sale_channel_listings.append(
-            SaleChannelListing(
-                sale=sale,
-                channel=channel_PLN,
-                discount_value=value * 2,
-                currency=channel_PLN.currency_code,
+        sale_channel_listings.extend(
+            (
+                SaleChannelListing(
+                    sale=sale,
+                    channel=channel_USD,
+                    discount_value=value,
+                    currency=channel_USD.currency_code,
+                ),
+                SaleChannelListing(
+                    sale=sale,
+                    channel=channel_PLN,
+                    discount_value=value * 2,
+                    currency=channel_PLN.currency_code,
+                ),
             )
         )
     SaleChannelListing.objects.bulk_create(sale_channel_listings)

@@ -466,10 +466,7 @@ fake.add_provider(SaleorProvider)
 def get_email(first_name, last_name):
     _first = unicodedata.normalize("NFD", first_name).encode("ascii", "ignore")
     _last = unicodedata.normalize("NFD", last_name).encode("ascii", "ignore")
-    return "%s.%s@example.com" % (
-        _first.lower().decode("utf-8"),
-        _last.lower().decode("utf-8"),
-    )
+    return f'{_first.lower().decode("utf-8")}.{_last.lower().decode("utf-8")}@example.com'
 
 
 def create_product_image(product, placeholder_dir, image_name):
@@ -701,20 +698,18 @@ def create_fake_order(discounts, max_order_lines=5):
     shipping_price = manager.apply_taxes_to_shipping(
         shipping_price, address, channel_slug=channel.slug
     )
-    order_data.update(
-        {
-            "channel": channel,
-            "shipping_method": shipping_method,
-            "shipping_method_name": shipping_method.name,
-            "shipping_price": shipping_price,
-        }
-    )
+    order_data |= {
+        "channel": channel,
+        "shipping_method": shipping_method,
+        "shipping_method_name": shipping_method.name,
+        "shipping_price": shipping_price,
+    }
     if will_be_unconfirmed:
         order_data["status"] = OrderStatus.UNCONFIRMED
 
     order = Order.objects.create(**order_data)
     lines = create_order_lines(order, discounts, random.randrange(1, max_order_lines))
-    order.total = sum([line.total_price for line in lines], shipping_price)
+    order.total = sum((line.total_price for line in lines), shipping_price)
     weight = Weight(kg=0)
     for line in order.lines.all():
         weight += line.variant.get_weight()
@@ -731,8 +726,7 @@ def create_fake_order(discounts, max_order_lines=5):
 
 def create_fake_sale():
     sale = Sale.objects.create(
-        name="Happy %s day!" % fake.word(),
-        type=DiscountValueType.PERCENTAGE,
+        name=f"Happy {fake.word()} day!", type=DiscountValueType.PERCENTAGE
     )
     for channel in Channel.objects.all():
         SaleChannelListing.objects.create(
@@ -747,9 +741,9 @@ def create_fake_sale():
 
 
 def create_users(how_many=10):
-    for dummy in range(how_many):
+    for _ in range(how_many):
         user = create_fake_user()
-        yield "User: %s" % (user.email,)
+        yield f"User: {user.email}"
 
 
 def create_permission_groups():
@@ -777,14 +771,11 @@ def create_staffs():
     for permission in get_permissions():
         base_name = permission.codename.split("_")[1:]
 
-        group_name = " ".join(base_name)
-        group_name += " management"
+        group_name = " ".join(base_name) + " management"
         group_name = group_name.capitalize()
 
         email_base_name = [name[:-1] if name[-1] == "s" else name for name in base_name]
-        user_email = ".".join(email_base_name)
-        user_email += ".manager@example.com"
-
+        user_email = ".".join(email_base_name) + ".manager@example.com"
         user = _create_staff_user(email=user_email)
         group = create_group(group_name, [permission], [user])
 
@@ -800,8 +791,7 @@ def create_group(name, permissions, users):
 
 
 def _create_staff_user(email=None, superuser=False):
-    user = User.objects.filter(email=email).first()
-    if user:
+    if user := User.objects.filter(email=email).first():
         return user
     address = create_address()
     first_name = address.first_name
@@ -809,7 +799,7 @@ def _create_staff_user(email=None, superuser=False):
     if not email:
         email = get_email(first_name, last_name)
 
-    staff_user = User.objects.create_user(
+    return User.objects.create_user(
         first_name=first_name,
         last_name=last_name,
         email=email,
@@ -820,7 +810,6 @@ def _create_staff_user(email=None, superuser=False):
         is_active=True,
         is_superuser=superuser,
     )
-    return staff_user
 
 
 def create_staff_users(how_many=2, superuser=False):
@@ -835,14 +824,14 @@ def create_orders(how_many=10):
     discounts = fetch_discounts(timezone.now())
     for _ in range(how_many):
         order = create_fake_order(discounts)
-        yield "Order: %s" % (order,)
+        yield f"Order: {order}"
 
 
 def create_product_sales(how_many=5):
-    for dummy in range(how_many):
+    for _ in range(how_many):
         sale = create_fake_sale()
         update_products_discounted_prices_of_discount_task.delay(sale.pk)
-        yield "Sale: %s" % (sale,)
+        yield f"Sale: {sale}"
 
 
 def create_channel(channel_name, currency_code, slug=None):
@@ -907,7 +896,7 @@ def create_shipping_zone(shipping_methods_names, countries, shipping_zone_name):
             ]
         )
     shipping_zone.channels.add(*channels)
-    return "Shipping Zone: %s" % shipping_zone
+    return f"Shipping Zone: {shipping_zone}"
 
 
 def create_shipping_zones():
@@ -1243,9 +1232,8 @@ def create_vouchers():
     )
     for channel in channels:
         discount_value = 25
-        min_spent_amount = 200
         if channel.currency_code == "PLN":
-            min_spent_amount *= 4
+            min_spent_amount = 200 * 4
             discount_value *= 4
         VoucherChannelListing.objects.get_or_create(
             voucher=voucher,
@@ -1341,7 +1329,7 @@ def create_page_type():
         page_type, _ = PageType.objects.update_or_create(
             pk=pk, **page_type_data["fields"]
         )
-        yield "Page type %s created" % page_type.slug
+        yield f"Page type {page_type.slug} created"
 
 
 def create_pages():
@@ -1425,7 +1413,7 @@ def create_pages():
         page, _ = Page.objects.get_or_create(
             pk=pk, slug=data["slug"], defaults=page_data
         )
-        yield "Page %s created" % page.slug
+        yield f"Page {page.slug} created"
 
 
 def generate_menu_items(menu: Menu, category: Category, parent_menu_item):
@@ -1434,7 +1422,7 @@ def generate_menu_items(menu: Menu, category: Category, parent_menu_item):
     )
 
     if created:
-        yield "Created menu item for category %s" % category
+        yield f"Created menu item for category {category}"
 
     for child in category.get_children():
         for msg in generate_menu_items(menu, child, menu_item):
@@ -1452,8 +1440,7 @@ def generate_menu_tree(menu):
     )
 
     for category in categories:
-        for msg in generate_menu_items(menu, category, None):
-            yield msg
+        yield from generate_menu_items(menu, category, None)
 
 
 def create_menus():
@@ -1463,9 +1450,7 @@ def create_menus():
     )
     top_menu.items.all().delete()
     yield "Created navbar menu"
-    for msg in generate_menu_tree(top_menu):
-        yield msg
-
+    yield from generate_menu_tree(top_menu)
     # Create footer menu with collections and pages
     bottom_menu, _ = Menu.objects.get_or_create(
         name=settings.DEFAULT_MENUS["bottom_menu_name"]
@@ -1500,8 +1485,7 @@ def create_menus():
 
 
 def get_product_list_images_dir(placeholder_dir):
-    product_list_images_dir = os.path.join(placeholder_dir, PRODUCTS_LIST_DIR)
-    return product_list_images_dir
+    return os.path.join(placeholder_dir, PRODUCTS_LIST_DIR)
 
 
 def get_image(image_dir, image_name):

@@ -70,12 +70,10 @@ class BaseReorderAttributesMutation(BaseMutation):
             key=lambda e: attr_pks.index(e.attribute.pk)
         )  # preserve order in pks
 
-        operations = {
+        return {
             attribute.pk: sort_order
             for attribute, sort_order in zip(attributes_m2m, sort_orders)
         }
-
-        return operations
 
 
 class BaseReorderAttributeValuesMutation(BaseMutation):
@@ -177,11 +175,10 @@ class BaseReorderAttributeValuesMutation(BaseMutation):
             key=lambda e: values_pks.index(e.value_id)
         )  # preserve order in pks
 
-        operations = {
-            value.pk: sort_order for value, sort_order in zip(values_m2m, sort_orders)
+        return {
+            value.pk: sort_order
+            for value, sort_order in zip(values_m2m, sort_orders)
         }
-
-        return operations
 
 
 class AttributeValueCreateInput(graphene.InputObjectType):
@@ -264,10 +261,7 @@ class AttributeMixin:
         for value_data in values_input:
             slug = slugify(value_data["name"], allow_unicode=True)
             if slug in existing_values:
-                msg = (
-                    "Value %s already exists within this attribute."
-                    % value_data["name"]
-                )
+                msg = f'Value {value_data["name"]} already exists within this attribute.'
                 raise ValidationError(
                     {
                         cls.ATTRIBUTE_VALUES_FIELD: ValidationError(
@@ -482,7 +476,7 @@ class AttributeUpdate(AttributeMixin, ModelMutation):
         remove_values = cleaned_input.get("remove_values", [])
         for value in remove_values:
             if value.attribute != instance:
-                msg = "Value %s does not belong to this attribute." % value
+                msg = f"Value {value} does not belong to this attribute."
                 raise ValidationError(
                     {
                         "remove_values": ValidationError(

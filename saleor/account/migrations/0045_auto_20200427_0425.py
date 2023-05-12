@@ -7,10 +7,7 @@ from django.utils.module_loading import import_string
 
 
 def create_payments_customer_ids():
-    plugins = []
-    for plugin_path in settings.PLUGINS:
-        plugins.append(import_string(plugin_path))
-
+    plugins = [import_string(plugin_path) for plugin_path in settings.PLUGINS]
     return {
         f"{plugin.PLUGIN_NAME.strip().upper()}.customer_id": (
             f"{plugin.PLUGIN_ID.strip().upper()}.customer_id"

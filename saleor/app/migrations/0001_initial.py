@@ -40,10 +40,9 @@ def update_contentypes_reverse(apps, schema_editor):
 
 def convert_service_account_permissions_to_app_permissions(apps, schema_editor):
     Permission = apps.get_model("auth", "Permission")
-    service_account_permission = Permission.objects.filter(
+    if service_account_permission := Permission.objects.filter(
         codename="manage_service_accounts", content_type__app_label="app"
-    ).first()
-    if service_account_permission:
+    ).first():
         service_account_permission.codename = "manage_apps"
         service_account_permission.name = "Manage apps"
         service_account_permission.save()

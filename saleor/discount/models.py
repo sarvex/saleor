@@ -118,9 +118,7 @@ class Voucher(models.Model):
     def get_discount_amount_for(self, price: Money, channel: Channel):
         discount = self.get_discount(channel)
         after_discount = discount(price)
-        if after_discount.amount < 0:
-            return price
-        return price - after_discount
+        return price if after_discount.amount < 0 else price - after_discount
 
     def validate_min_spent(self, value: TaxedMoney, channel: Channel):
         value = value.gross if display_gross_prices() else value.net
@@ -145,10 +143,9 @@ class Voucher(models.Model):
             )
 
     def validate_once_per_customer(self, customer_email):
-        voucher_customer = VoucherCustomer.objects.filter(
+        if voucher_customer := VoucherCustomer.objects.filter(
             voucher=self, customer_email=customer_email
-        )
-        if voucher_customer:
+        ):
             msg = "This offer is valid only once per customer."
             raise NotApplicable(msg)
 

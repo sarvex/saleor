@@ -88,7 +88,7 @@ def test_export_products_mutation(
     )
 
     assert not data["errors"]
-    assert data["exportFile"]["id"]
+    assert export_file_data["id"]
     assert export_file_data["createdAt"]
     assert export_file_data["user"]["email"] == staff_api_client.user.email
     assert export_file_data["app"] is None
@@ -134,7 +134,7 @@ def test_export_products_mutation_by_app(
     )
 
     assert not data["errors"]
-    assert data["exportFile"]["id"]
+    assert export_file_data["id"]
     assert export_file_data["createdAt"]
     assert export_file_data["user"] is None
     assert export_file_data["app"]["name"] == app.name
@@ -195,7 +195,7 @@ def test_export_products_mutation_ids_scope(
     assert call_args[3] == FileTypeEnum.XLSX.value
 
     assert not data["errors"]
-    assert data["exportFile"]["id"]
+    assert export_file_data["id"]
     assert export_file_data["createdAt"]
     assert export_file_data["user"]["email"] == staff_api_client.user.email
     assert export_file_data["app"] is None
@@ -216,10 +216,10 @@ def test_export_products_mutation_ids_scope_invalid_object_type(
 
     products = product_list[:2]
 
-    ids = []
-    for product in products:
-        ids.append(graphene.Node.to_global_id("ProductVariant", product.pk))
-
+    ids = [
+        graphene.Node.to_global_id("ProductVariant", product.pk)
+        for product in products
+    ]
     variables = {
         "input": {
             "scope": ExportScope.IDS.name,
@@ -321,7 +321,7 @@ def test_export_products_mutation_with_warehouse_and_attribute_ids(
     assert call_args[3] == FileTypeEnum.CSV.value
 
     assert not data["errors"]
-    assert data["exportFile"]["id"]
+    assert export_file_data["id"]
     assert export_file_data["createdAt"]
     assert export_file_data["user"]["email"] == staff_api_client.user.email
     assert export_file_data["app"] is None
@@ -344,10 +344,10 @@ def test_export_products_mutation_with_warehouse_ids_invalid_object_type(
 
     products = product_list[:2]
 
-    ids = []
-    for product in products:
-        ids.append(graphene.Node.to_global_id("Product", product.pk))
-
+    ids = [
+        graphene.Node.to_global_id("Product", product.pk)
+        for product in products
+    ]
     warehouse_pks = [str(warehouse.pk) for warehouse in Warehouse.objects.all()]
     channel_pks = [str(channel.pk) for channel in Channel.objects.all()]
 
@@ -400,10 +400,10 @@ def test_export_products_mutation_with_attribute_ids_invalid_object_type(
 
     products = product_list[:2]
 
-    ids = []
-    for product in products:
-        ids.append(graphene.Node.to_global_id("Product", product.pk))
-
+    ids = [
+        graphene.Node.to_global_id("Product", product.pk)
+        for product in products
+    ]
     attribute_pks = [str(attr.pk) for attr in Attribute.objects.all()]
     channel_pks = [str(channel.pk) for channel in Channel.objects.all()]
 
@@ -456,10 +456,10 @@ def test_export_products_mutation_with_channel_ids_invalid_object_type(
 
     products = product_list[:2]
 
-    ids = []
-    for product in products:
-        ids.append(graphene.Node.to_global_id("Product", product.pk))
-
+    ids = [
+        graphene.Node.to_global_id("Product", product.pk)
+        for product in products
+    ]
     attribute_pks = [str(attr.pk) for attr in Attribute.objects.all()]
     channel_pks = [str(channel.pk) for channel in Channel.objects.all()]
 
@@ -541,7 +541,7 @@ def test_export_products_mutation_failed(
 
     export_products_mock.assert_not_called()
 
-    assert data["errors"]
+    assert errors
     assert errors[0]["field"] == error_field
     assert not ExportEvent.objects.filter(
         user=user, type=ExportEvents.EXPORT_PENDING

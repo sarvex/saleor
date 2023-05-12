@@ -32,7 +32,7 @@ def get_bool_from_env(name, default_value):
         try:
             return ast.literal_eval(value)
         except ValueError as e:
-            raise ValueError("{} is an invalid value for {}".format(value, name)) from e
+            raise ValueError(f"{value} is an invalid value for {name}") from e
     return default_value
 
 
@@ -138,10 +138,7 @@ EMAIL_URL = os.environ.get("EMAIL_URL")
 SENDGRID_USERNAME = os.environ.get("SENDGRID_USERNAME")
 SENDGRID_PASSWORD = os.environ.get("SENDGRID_PASSWORD")
 if not EMAIL_URL and SENDGRID_USERNAME and SENDGRID_PASSWORD:
-    EMAIL_URL = "smtp://%s:%s@smtp.sendgrid.net:587/?tls=True" % (
-        SENDGRID_USERNAME,
-        SENDGRID_PASSWORD,
-    )
+    EMAIL_URL = f"smtp://{SENDGRID_USERNAME}:{SENDGRID_PASSWORD}@smtp.sendgrid.net:587/?tls=True"
 email_config = dj_email_url.parse(
     EMAIL_URL or "console://demo@example.com:console@example/"
 )
@@ -160,9 +157,7 @@ ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL = get_bool_from_env(
     "ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL", True
 )
 
-ENABLE_SSL = get_bool_from_env("ENABLE_SSL", False)
-
-if ENABLE_SSL:
+if ENABLE_SSL := get_bool_from_env("ENABLE_SSL", False):
     SECURE_SSL_REDIRECT = not DEBUG
 
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
@@ -276,8 +271,7 @@ if ENABLE_DJANGO_EXTENSIONS:
         "django_extensions",
     ]
 
-ENABLE_DEBUG_TOOLBAR = get_bool_from_env("ENABLE_DEBUG_TOOLBAR", False)
-if ENABLE_DEBUG_TOOLBAR:
+if ENABLE_DEBUG_TOOLBAR := get_bool_from_env("ENABLE_DEBUG_TOOLBAR", False):
     # Ensure the graphiql debug toolbar is actually installed before adding it
     try:
         __import__("graphiql_debug_toolbar")
@@ -542,8 +536,7 @@ DEFAULT_CHANNEL_SLUG = os.environ.get("DEFAULT_CHANNEL_SLUG", "default-channel")
 
 #  Sentry
 sentry_sdk.utils.MAX_STRING_LENGTH = 4096
-SENTRY_DSN = os.environ.get("SENTRY_DSN")
-if SENTRY_DSN:
+if SENTRY_DSN := os.environ.get("SENTRY_DSN"):
     sentry_sdk.init(
         dsn=SENTRY_DSN, integrations=[CeleryIntegration(), DjangoIntegration()]
     )
@@ -578,7 +571,7 @@ PLUGINS = [
 # Plugin discovery
 installed_plugins = pkg_resources.iter_entry_points("saleor.plugins")
 for entry_point in installed_plugins:
-    plugin_path = "{}.{}".format(entry_point.module_name, entry_point.attrs[0])
+    plugin_path = f"{entry_point.module_name}.{entry_point.attrs[0]}"
     if plugin_path not in PLUGINS:
         if entry_point.name not in INSTALLED_APPS:
             INSTALLED_APPS.append(entry_point.name)
@@ -618,9 +611,7 @@ if "JAEGER_AGENT_HOST" in os.environ:
     ).initialize_tracer()
 
 
-# Some cloud providers (Heroku) export REDIS_URL variable instead of CACHE_URL
-REDIS_URL = os.environ.get("REDIS_URL")
-if REDIS_URL:
+if REDIS_URL := os.environ.get("REDIS_URL"):
     CACHE_URL = os.environ.setdefault("CACHE_URL", REDIS_URL)
 CACHES = {"default": django_cache_url.config()}
 CACHES["default"]["TIMEOUT"] = parse(os.environ.get("CACHE_TIMEOUT", "7 days"))

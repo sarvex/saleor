@@ -145,9 +145,9 @@ def test_create_fake_order(db, monkeypatch, image, media_root, warehouse):
         pass
     for _ in random_data.create_users(3):
         pass
-    for msg in random_data.create_page_type():
+    for _ in random_data.create_page_type():
         pass
-    for msg in random_data.create_pages():
+    for _ in random_data.create_pages():
         pass
     random_data.create_products_by_schema("/", False)
     how_many = 2
@@ -158,9 +158,7 @@ def test_create_fake_order(db, monkeypatch, image, media_root, warehouse):
 
 def test_create_product_sales(db):
     how_many = 5
-    channel_count = 0
-    for _ in random_data.create_channels():
-        channel_count += 1
+    channel_count = sum(1 for _ in random_data.create_channels())
     for _ in random_data.create_product_sales(how_many):
         pass
     assert Sale.objects.all().count() == how_many
@@ -169,9 +167,7 @@ def test_create_product_sales(db):
 
 def test_create_vouchers(db):
     voucher_count = 3
-    channel_count = 0
-    for _ in random_data.create_channels():
-        channel_count += 1
+    channel_count = sum(1 for _ in random_data.create_channels())
     assert Voucher.objects.all().count() == 0
     for _ in random_data.create_vouchers():
         pass
@@ -244,7 +240,7 @@ def test_build_absolute_uri(site_settings, settings):
     # Case when static url is resolved to relative url
     logo_url = build_absolute_uri(static("images/close.svg"))
     protocol = "https" if settings.ENABLE_SSL else "http"
-    current_url = "%s://%s" % (protocol, site_settings.site.domain)
+    current_url = f"{protocol}://{site_settings.site.domain}"
     logo_location = urljoin(current_url, static("images/close.svg"))
     assert logo_url == logo_location
 
@@ -261,7 +257,7 @@ def test_delete_sort_order_with_null_value(menu_item):
 def test_placeholder(settings):
     size = 60
     result = placeholder(size)
-    assert result == "/static/" + settings.PLACEHOLDER_IMAGES[size]
+    assert result == f"/static/{settings.PLACEHOLDER_IMAGES[size]}"
 
 
 @pytest.mark.parametrize(

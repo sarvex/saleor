@@ -73,10 +73,10 @@ class ExportFile(CountableDjangoObjectType):
     @staticmethod
     @traced_resolver
     def resolve_url(root: models.ExportFile, info):
-        content_file = root.content_file
-        if not content_file:
+        if content_file := root.content_file:
+            return info.context.build_absolute_uri(content_file.url)
+        else:
             return None
-        return info.context.build_absolute_uri(content_file.url)
 
     @staticmethod
     @traced_resolver

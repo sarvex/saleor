@@ -102,8 +102,7 @@ class Command(BaseCommand):
         User.objects.exclude(pk__in=staff).delete()
         self.stdout.write("Removed customers")
 
-        should_delete_staff = options.get("delete_staff")
-        if should_delete_staff:
+        if should_delete_staff := options.get("delete_staff"):
             staff = staff.exclude(is_superuser=True)
             staff.delete()
             self.stdout.write("Removed staff users")

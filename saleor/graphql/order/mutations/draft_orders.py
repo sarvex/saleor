@@ -107,8 +107,7 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
 
         channel = cls.clean_channel_id(info, instance, cleaned_input, channel_id)
 
-        voucher = cleaned_input.get("voucher", None)
-        if voucher:
+        if voucher := cleaned_input.get("voucher", None):
             cls.clean_voucher(voucher, channel)
 
         if channel:
@@ -134,23 +133,20 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
 
     @classmethod
     def clean_channel_id(cls, info, instance, cleaned_input, channel_id):
-        if channel_id:
-            if hasattr(instance, "channel"):
-                raise ValidationError(
-                    {
-                        "channel_id": ValidationError(
-                            "Can't update existing order channel id.",
-                            code=OrderErrorCode.NOT_EDITABLE.value,
-                        )
-                    }
-                )
-            else:
-                channel = cls.get_node_or_error(info, channel_id, only_type=Channel)
-                cleaned_input["channel"] = channel
-                return channel
-
-        else:
+        if not channel_id:
             return instance.channel if hasattr(instance, "channel") else None
+        if hasattr(instance, "channel"):
+            raise ValidationError(
+                {
+                    "channel_id": ValidationError(
+                        "Can't update existing order channel id.",
+                        code=OrderErrorCode.NOT_EDITABLE.value,
+                    )
+                }
+            )
+        channel = cls.get_node_or_error(info, channel_id, only_type=Channel)
+        cleaned_input["channel"] = channel
+        return channel
 
     @classmethod
     def clean_voucher(cls, voucher, channel):
@@ -172,7 +168,7 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
             validate_product_is_published_in_channel(variants, channel)
             validate_variant_channel_listings(variants, channel)
             quantities = [line.get("quantity") for line in lines]
-            if not all(quantity > 0 for quantity in quantities):
+            if any(quantity <= 0 for quantity in quantities):
                 raise ValidationError(
                     {
                         "quantity": ValidationError(
@@ -221,12 +217,10 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
 
     @staticmethod
     def _save_addresses(info, instance: models.Order, cleaned_input):
-        shipping_address = cleaned_input.get("shipping_address")
-        if shipping_address:
+        if shipping_address := cleaned_input.get("shipping_address"):
             shipping_address.save()
             instance.shipping_address = shipping_address.get_copy()
-        billing_address = cleaned_input.get("billing_address")
-        if billing_address:
+        if billing_address := cleaned_input.get("billing_address"):
             billing_address.save()
             instance.billing_address = billing_address.get_copy()
 
@@ -299,7 +293,7 @@ class DraftOrderCreate(ModelMutation, I18nMixin):
             cls._refresh_lines_unit_price(info, instance, cleaned_input, new_instance)
         except TaxError as tax_error:
             raise ValidationError(
-                "Unable to calculate taxes - %s" % str(tax_error),
+                f"Unable to calculate taxes - {str(tax_error)}",
                 code=OrderErrorCode.TAX_ERROR.value,
             )
 

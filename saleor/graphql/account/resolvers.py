@@ -52,8 +52,7 @@ def resolve_staff_users(info, **_kwargs):
 
 @traced_resolver
 def resolve_user(info, id=None, email=None):
-    requester = get_user_or_app_from_context(info.context)
-    if requester:
+    if requester := get_user_or_app_from_context(info.context):
         filter_kwargs = {}
         if id:
             _model, filter_kwargs["pk"] = from_global_id_or_error(id, User)
@@ -136,21 +135,19 @@ def resolve_payment_sources(info, user: models.User, channel_slug: str):
 
 
 def prepare_graphql_payment_sources_type(payment_sources):
-    sources = []
-    for src in payment_sources:
-        sources.append(
-            {
-                "gateway": src.gateway,
-                "credit_card_info": {
-                    "last_digits": src.credit_card_info.last_4,
-                    "exp_year": src.credit_card_info.exp_year,
-                    "exp_month": src.credit_card_info.exp_month,
-                    "brand": "",
-                    "first_digits": "",
-                },
-            }
-        )
-    return sources
+    return [
+        {
+            "gateway": src.gateway,
+            "credit_card_info": {
+                "last_digits": src.credit_card_info.last_4,
+                "exp_year": src.credit_card_info.exp_year,
+                "exp_month": src.credit_card_info.exp_month,
+                "brand": "",
+                "first_digits": "",
+            },
+        }
+        for src in payment_sources
+    ]
 
 
 @traced_resolver

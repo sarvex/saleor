@@ -55,9 +55,7 @@ def export_products(
 
 def get_filename(model_name: str, file_type: str) -> str:
     hash = secrets.token_hex(nbytes=3)
-    return "{}_data_{}_{}.{}".format(
-        model_name, timezone.now().strftime("%d_%m_%Y_%H_%M_%S"), hash, file_type
-    )
+    return f'{model_name}_data_{timezone.now().strftime("%d_%m_%Y_%H_%M_%S")}_{hash}.{file_type}'
 
 
 def get_product_queryset(scope: Dict[str, Union[str, dict]]) -> "QuerySet":

@@ -60,9 +60,7 @@ class AppQueries(graphene.ObjectType):
 
     def resolve_app(self, info, id=None):
         app = info.context.app
-        if not id and app:
-            return app
-        return resolve_app(info, id)
+        return app if not id and app else resolve_app(info, id)
 
 
 class AppMutations(graphene.ObjectType):

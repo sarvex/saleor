@@ -65,5 +65,6 @@ def test_attributes_query_with_filter(
 
     assert flat_attributes_data == expected_flat_attributes_data
     assert any(
-        [str(warning.message) == DEPRECATION_WARNING_MESSAGE for warning in warns]
+        str(warning.message) == DEPRECATION_WARNING_MESSAGE
+        for warning in warns
     )

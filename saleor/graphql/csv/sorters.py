@@ -13,7 +13,7 @@ class ExportFileSortField(graphene.Enum):
         if self.name in ExportFileSortField.__enum__._member_names_:
             sort_name = self.name.lower().replace("_", " ")
             return f"Sort export file by {sort_name}."
-        raise ValueError("Unsupported enum value: %s" % self.value)
+        raise ValueError(f"Unsupported enum value: {self.value}")
 
 
 class ExportFileSortingInput(SortInputObjectType):

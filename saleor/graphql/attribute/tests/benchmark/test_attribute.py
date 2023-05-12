@@ -123,11 +123,10 @@ def test_attribute_translation(
     """
 
     attributes = [size_attribute, weight_attribute, color_attribute]
-    translations = []
-    for attribute in attributes:
-        translations.append(
-            AttributeTranslation(attribute=attribute, language_code="en")
-        )
+    translations = [
+        AttributeTranslation(attribute=attribute, language_code="en")
+        for attribute in attributes
+    ]
     AttributeTranslation.objects.bulk_create(translations)
 
     get_graphql_content(staff_api_client.post_graphql(query, {}))
@@ -159,13 +158,12 @@ def test_attribute_value_translation(
     """
 
     attribute_values = rich_text_attribute_with_many_values.values.all()
-    translations = []
-    for attribute_value in attribute_values:
-        translations.append(
-            AttributeValueTranslation(
-                attribute_value=attribute_value, language_code="en"
-            )
+    translations = [
+        AttributeValueTranslation(
+            attribute_value=attribute_value, language_code="en"
         )
+        for attribute_value in attribute_values
+    ]
     AttributeValueTranslation.objects.bulk_create(translations)
 
     product.product_type.product_attributes.add(rich_text_attribute_with_many_values)

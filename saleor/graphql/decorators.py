@@ -56,8 +56,7 @@ def account_passes_test_for_attribute(test_func):
 def _permission_required(perms: Iterable[Enum], context):
     if context.user.has_perms(perms):
         return True
-    app = getattr(context, "app", None)
-    if app:
+    if app := getattr(context, "app", None):
         # for now MANAGE_STAFF permission for app is not supported
         if AccountPermissions.MANAGE_STAFF in perms:
             return False
@@ -67,10 +66,7 @@ def _permission_required(perms: Iterable[Enum], context):
 
 def permission_required(perm: Union[Enum, Iterable[Enum]]):
     def check_perms(context):
-        if isinstance(perm, Enum):
-            perms = (perm,)
-        else:
-            perms = perm
+        perms = (perm, ) if isinstance(perm, Enum) else perm
         return _permission_required(perms, context)
 
     return account_passes_test(check_perms)

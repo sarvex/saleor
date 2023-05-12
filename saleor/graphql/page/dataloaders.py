@@ -190,10 +190,7 @@ class SelectedAttributesByPageIdLoader(DataLoader):
                             attribute = id_to_attribute[
                                 assigned_pagetype_attribute.attribute_id
                             ]
-                            if page_assignment:
-                                values = attribute_values[page_assignment.id]
-                            else:
-                                values = []
+                            values = attribute_values[page_assignment.id] if page_assignment else []
                             selected_attributes_map[key].append(
                                 {"values": values, "attribute": attribute}
                             )

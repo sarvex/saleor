@@ -114,7 +114,7 @@ def test_get_prices_of_discounted_specific_product(
         line.variant.get_price(
             product, [collection], channel, variant_channel_listing, []
         )
-        for item in range(line.quantity)
+        for _ in range(line.quantity)
     ]
 
     assert prices == excepted_value
@@ -142,8 +142,10 @@ def test_get_prices_of_discounted_specific_product_only_product(
     )
 
     excepted_value = [
-        line.variant.get_price(product, [], channel, variant_channel_listing, [])
-        for item in range(line.quantity)
+        line.variant.get_price(
+            product, [], channel, variant_channel_listing, []
+        )
+        for _ in range(line.quantity)
     ]
 
     assert checkout.lines.count() > 1
@@ -179,7 +181,7 @@ def test_get_prices_of_discounted_specific_product_only_collection(
         line.variant.get_price(
             product, [collection], channel, variant_channel_listing, []
         )
-        for item in range(line.quantity)
+        for _ in range(line.quantity)
     ]
 
     assert checkout.lines.count() > 1
@@ -212,8 +214,10 @@ def test_get_prices_of_discounted_specific_product_only_category(
     )
 
     excepted_value = [
-        line.variant.get_price(product, [], channel, variant_channel_listing, [])
-        for item in range(line.quantity)
+        line.variant.get_price(
+            product, [], channel, variant_channel_listing, []
+        )
+        for _ in range(line.quantity)
     ]
 
     assert checkout.lines.count() > 1
@@ -238,8 +242,10 @@ def test_get_prices_of_discounted_specific_product_all_products(
     )
 
     excepted_value = [
-        line.variant.get_price(product, [], channel, variant_channel_listing, [])
-        for item in range(line.quantity)
+        line.variant.get_price(
+            product, [], channel, variant_channel_listing, []
+        )
+        for _ in range(line.quantity)
     ]
 
     assert prices == excepted_value

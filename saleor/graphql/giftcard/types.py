@@ -59,6 +59,4 @@ class GiftCard(CountableDjangoObjectType):
         if user.has_perm(GiftcardPermissions.MANAGE_GIFT_CARD) and not root.user:
             return root.code
         # Only user associated with a gift card can see gift card code.
-        if user == root.user:
-            return root.code
-        return None
+        return root.code if user == root.user else None

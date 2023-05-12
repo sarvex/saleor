@@ -90,7 +90,7 @@ def jwt_decode(token: str, verify_expiration=settings.JWT_EXPIRE) -> Dict[str, A
 
 
 def create_token(payload: Dict[str, Any], exp_delta: timedelta) -> str:
-    payload.update(jwt_base_payload(exp_delta, token_owner=JWT_SALEOR_OWNER_NAME))
+    payload |= jwt_base_payload(exp_delta, token_owner=JWT_SALEOR_OWNER_NAME)
     return jwt_encode(payload)
 
 
@@ -147,9 +147,7 @@ def is_saleor_token(token: str) -> bool:
     except jwt.PyJWTError:
         return False
     owner = payload.get(JWT_OWNER_FIELD)
-    if not owner or owner != JWT_SALEOR_OWNER_NAME:
-        return False
-    return True
+    return bool(owner and owner == JWT_SALEOR_OWNER_NAME)
 
 
 def get_user_from_access_token(token: str) -> Optional[User]:
@@ -172,7 +170,7 @@ def get_user_from_access_payload(payload: dict) -> Optional[User]:
             token_permissions = get_permissions_from_names(permissions)
             token_codenames = [perm.codename for perm in token_permissions]
             user.effective_permissions = get_permissions_from_codenames(token_codenames)
-            user.is_staff = True if user.effective_permissions else False
+            user.is_staff = bool(user.effective_permissions)
 
         if payload.get("is_staff"):
             user.is_staff = True

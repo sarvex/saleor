@@ -4,22 +4,24 @@ from .....core.utils.editorjs import clean_editor_js
 
 def add_product_attribute_data_to_expected_data(data, product, attribute_ids, pk=None):
     for assigned_attribute in product.attributes.all():
-        if assigned_attribute:
+        if (
+            assigned_attribute
+            and str(assigned_attribute.attribute.pk) in attribute_ids
+        ):
+            value = get_attribute_value(assigned_attribute)
             header = f"{assigned_attribute.attribute.slug} (product attribute)"
-            if str(assigned_attribute.attribute.pk) in attribute_ids:
-                value = get_attribute_value(assigned_attribute)
-                if pk:
-                    data[pk][header] = value
-                else:
-                    data[header] = value
+            if pk:
+                data[pk][header] = value
+            else:
+                data[header] = value
     return data
 
 
 def add_variant_attribute_data_to_expected_data(data, variant, attribute_ids, pk=None):
     for assigned_attribute in variant.attributes.all():
-        header = f"{assigned_attribute.attribute.slug} (variant attribute)"
         if str(assigned_attribute.attribute.pk) in attribute_ids:
             value = get_attribute_value(assigned_attribute)
+            header = f"{assigned_attribute.attribute.slug} (variant attribute)"
             if pk:
                 data[pk][header] = value
             else:
@@ -34,7 +36,7 @@ def get_attribute_value(assigned_attribute):
         return ""
     attribute = assigned_attribute.attribute
     if attribute.input_type == AttributeInputType.FILE:
-        value = "http://mirumee.com/media/" + value_instance.file_url
+        value = f"http://mirumee.com/media/{value_instance.file_url}"
     elif attribute.input_type == AttributeInputType.REFERENCE:
         ref_id = value_instance.slug.split("_")[1]
         value = f"{attribute.entity_type}_{ref_id}"

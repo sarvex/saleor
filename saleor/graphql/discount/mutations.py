@@ -79,8 +79,9 @@ class BaseDiscountCatalogueMutation(BaseMutation):
 
     @classmethod
     def clean_product(cls, products):
-        products_ids_without_variants = get_products_ids_without_variants(products)
-        if products_ids_without_variants:
+        if products_ids_without_variants := get_products_ids_without_variants(
+            products
+        ):
             raise ValidationError(
                 {
                     "products": ValidationError(
@@ -185,9 +186,7 @@ class VoucherCreate(ModelMutation):
                     )
                 }
             )
-        cleaned_input = super().clean_input(info, instance, data)
-
-        return cleaned_input
+        return super().clean_input(info, instance, data)
 
     @classmethod
     def success_response(cls, instance):
@@ -235,8 +234,7 @@ class VoucherDelete(ModelDeleteMutation):
     @classmethod
     def success_response(cls, instance):
         instance = ChannelContext(node=instance, channel_slug=None)
-        response = super().success_response(instance)
-        return response
+        return super().success_response(instance)
 
 
 class VoucherBaseCatalogueMutation(BaseDiscountCatalogueMutation):
@@ -365,8 +363,7 @@ class VoucherChannelListingUpdate(BaseChannelListingMutation):
                         cleaned_channel["channel_id"]
                     )
 
-            min_amount_spent = cleaned_channel.get("min_amount_spent", None)
-            if min_amount_spent:
+            if min_amount_spent := cleaned_channel.get("min_amount_spent", None):
                 try:
                     validate_price_precision(min_amount_spent, channel.currency_code)
                 except ValidationError:
@@ -387,8 +384,7 @@ class VoucherChannelListingUpdate(BaseChannelListingMutation):
             voucher,
             error_dict,
         )
-        channels_without_value = error_dict["channels_without_value"]
-        if channels_without_value:
+        if channels_without_value := error_dict["channels_without_value"]:
             errors["discount_value"].append(
                 ValidationError(
                     "Value is required for voucher.",
@@ -397,10 +393,9 @@ class VoucherChannelListingUpdate(BaseChannelListingMutation):
                 )
             )
 
-        channels_with_invalid_value_precision = error_dict[
+        if channels_with_invalid_value_precision := error_dict[
             "channels_with_invalid_value_precision"
-        ]
-        if channels_with_invalid_value_precision:
+        ]:
             errors["discount_value"].append(
                 ValidationError(
                     "Invalid amount precision.",
@@ -409,10 +404,9 @@ class VoucherChannelListingUpdate(BaseChannelListingMutation):
                 )
             )
 
-        channels_with_invalid_percentage_value = error_dict[
+        if channels_with_invalid_percentage_value := error_dict[
             "channels_with_invalid_percentage_value"
-        ]
-        if channels_with_invalid_percentage_value:
+        ]:
             errors["discount_value"].append(
                 ValidationError(
                     "Invalid percentage value.",
@@ -421,10 +415,9 @@ class VoucherChannelListingUpdate(BaseChannelListingMutation):
                 )
             )
 
-        channels_with_invalid_min_amount_spent_precision = error_dict[
+        if channels_with_invalid_min_amount_spent_precision := error_dict[
             "channels_with_invalid_min_amount_spent_precision"
-        ]
-        if channels_with_invalid_min_amount_spent_precision:
+        ]:
             errors["min_amount_spent"].append(
                 ValidationError(
                     "Invalid amount precision.",
