@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: rlespinasse/github-slug-action@e4699e49fcf890a3172a02c56ba78d867dbb9fd5
+      - uses: rlespinasse/github-slug-action@d1ca8ffbce40ea2371e35bca356db0acacf567d2
 
       - name: Build and push
         uses: kciter/aws-ecr-action@cd453341c21d7e11e9b8a6d4d3163a9928a4225c
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: rlespinasse/github-slug-action@e4699e49fcf890a3172a02c56ba78d867dbb9fd5
+      - uses: rlespinasse/github-slug-action@d1ca8ffbce40ea2371e35bca356db0acacf567d2
 
       - name: Get pull number
         run: |
