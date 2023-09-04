@@ -2807,18 +2807,18 @@ files = [
 
 [[package]]
 name = "petl"
-version = "1.7.12"
+version = "1.7.14"
 description = "A Python package for extracting, transforming and loading tables of data."
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
-    {file = "petl-1.7.12.tar.gz", hash = "sha256:d4a94e0d6f1274062fe92353b99a007ee12c7c84b4c31c0cb9713ed5dbda22e7"},
+    {file = "petl-1.7.14.tar.gz", hash = "sha256:d4802e3c4804bf85f2267a0102fcad35c61e6a37c90d9e1a1674331f35a90a7f"},
 ]
 
 [package.extras]
 avro = ["fastavro (>=0.24.0)"]
 bcolz = ["bcolz (>=1.2.1)"]
-db = ["SQLAlchemy (>=1.3.6)"]
+db = ["SQLAlchemy (>=1.3.6,<2.0)"]
 hdf5 = ["cython (>=0.29.13)", "numexpr (>=2.6.9)", "numpy (>=1.16.4)", "tables (>=3.5.2)"]
 http = ["aiohttp (>=3.6.2)", "requests"]
 interval = ["intervaltree (>=3.0.2)"]
@@ -4827,4 +4827,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.9"
-content-hash = "06efae7c812629596dc82ac7db9b4f3ac7476b85591154cf94591e94e7c7f10e"
+content-hash = "9136c911917b483c99ca1f018c9135742c41cfb6d4448fbaceb785cf1be097d4"
